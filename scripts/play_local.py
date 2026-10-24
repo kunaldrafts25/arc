@@ -53,6 +53,7 @@ def main() -> None:
                    help="Per-game cap on actions (overrides MyAgent.MAX_ACTIONS).")
     p.add_argument("--list", action="store_true",
                    help="List available games and exit.")
+    p.add_argument("--offline", action="store_true", help="Use cached environments without network access.")
     p.add_argument("--render", default=None, choices=[None, "terminal"],
                    help="Optional terminal rendering each step.")
     args = p.parse_args()
@@ -61,7 +62,7 @@ def main() -> None:
 
     # NORMAL = local execution; game source is downloaded on first call into
     # ./environment_files/ and cached for subsequent runs.
-    arc = arc_agi.Arcade(operation_mode=OperationMode.NORMAL)
+    arc = arc_agi.Arcade(operation_mode=OperationMode.OFFLINE if args.offline else OperationMode.NORMAL)
     all_envs = arc.get_environments()
 
     if args.list:

@@ -35,7 +35,7 @@ def test_all_advertised_action_types_and_invalid_coordinates():
 
 
 def test_lifecycle_memory_resets_and_caps():
-    a = agent()
+    a = agent(hydra_policy="memory")
     f = frame(GameState.NOT_PLAYED)
     assert a.choose_action([f], f) is GameAction.RESET
     f = frame(actions=[1])

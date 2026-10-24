@@ -12,13 +12,30 @@ Implemented components: lossless frame history retention, deterministic latest-i
 
 The controller modes describe actual action selection, not inferred semantic understanding. Its frontier goal is an observed state with untested actions; it has no verified general game-goal recognizer. A repeated image does not prove that the hidden game state is identical. Contradictory transitions disable deterministic prediction.
 
-## Measurement
+## Final measured default
+
+Default policy: novelty. It retains raw transition tuples and state/action counts, while predictive outcome modeling and frontier planning stay optional. Across all 25 public games and five policy seeds (0 through 4), with environment seed 0 and 200 commands per game:
+
+| Policy | Runs | Level completions | Full game wins | Mean official local score (0–100) |
+|---|---:|---:|---:|---:|
+| Original starter | 125 | 4 | 0 | 0.0374618 |
+| Legal random | 125 | 9 | 0 | 0.0584302 |
+| Novelty (selected) | 125 | 9 | 0 | 0.1491665 |
+| Transition memory | 125 | 9 | 0 | 0.1491665 |
+
+The separate confirmation seeds 3 and 4 gave novelty/memory 0.148328, legal random 0.032521 and starter 0.001714. Predictive memory did not improve on the simpler policy, so it was not selected. Planning matched memory on the initial 75 runs and never selected a planned action. Persistence matched legal random; click coverage scored lower (0.008066 on 75 runs). These methods are retained as reproducible experimental variants, not claimed improvements.
+
+The consolidated training report contains 525 validated rows (7 policies × 25 games × 3 seeds). Confirmation contains 200 validated rows (4 policies × 25 games × 2 seeds). No included row has a recorded exception. Raw source files and their SHA-256 manifest are preserved. Superseded novelty rows are excluded explicitly. Counts sum across repeated seeds; nine completions do not mean nine different levels. Scores remain extremely low, and the project has not solved a complete game.
+
+## Earlier measurement and provenance
 
 The first ablation used ls20 and vc33, 3 policy seeds, fixed environment seed 0 and equal 200-command caps. Across six runs per policy, the pristine starter completed zero levels, legal random completed three, and novelty, memory and planning each completed one. No full games were won. Legal random's mean local score was 0.028675 on the 0–100 scale. Full raw scorecards are in reports/ablation-v01.jsonl.
 
 All 25 public environments were then downloaded through the official API and smoke-tested at 50 commands. Full comparisons use the stable cache, equal 200-command caps and policy seeds 0,1,2. See reports/public-ablation.md for the completed comparison. Scores come directly from the installed official scorer; missing information stays unavailable. These runs are development-set experiments, not hidden validation.
 
-Eighteen Hydra tests pass, including a real-engine integration test and a simulated reset-to-level-transition-to-WIN lifecycle test. The independent upstream recorder tests pass 19/19. The full upstream suite fails collection on four files because this framework checkout's tests reference absent agents.structs or optional openai. Original Windows source-encoding and terminal-output bugs were fixed separately from policy changes.
+Nineteen Hydra tests pass, including a real-engine integration test, a simulated reset-to-level-transition-to-WIN lifecycle test and a guard preventing the novelty ablation from training/consulting the predictive model. The independent upstream recorder tests pass 19/19. The full upstream suite fails collection on four files because this framework checkout's tests reference absent agents.structs or optional openai. Original Windows source-encoding and terminal-output bugs were fixed separately from policy changes.
+
+The original novelty ablation accidentally consulted the model. Its raw results are retained with an erratum, and corrected reruns replace them in the final comparison. The full original run produced 450 rows with no per-run exceptions. Memory and planning produced zero confirmed model predictions and zero planned actions; BFS therefore has no demonstrated gameplay contribution in this experiment.
 
 ## Largest observed bottlenecks
 

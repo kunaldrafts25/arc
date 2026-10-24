@@ -36,7 +36,12 @@ class Controller:
     def observe(self, state):
         self.last_was_noop = self.previous is not None and self.previous[0] == state
         if self.previous:
-            self.memory.record(*self.previous, state)
+            if self.policy != "novelty":
+                self.memory.record(*self.previous, state)
+            else:
+                # Keep bounded raw transition evidence for debugging without
+                # training or consulting the predictive model in this ablation.
+                self.memory.history.append((*self.previous, state))
             if self.previous[0] == state:
                 self.stats["ineffective_actions"] += 1
         if self.expected is not None:
@@ -78,7 +83,7 @@ class Controller:
         else:
             def utility(action):
                 n = self.memory.attempts(state, action) if self.policy != "novelty" else self.action_counts[state, action]
-                target = self.memory.predict(state, action)
+                target = self.memory.predict(state, action) if self.policy != "novelty" else None
                 no_effect = 1 if target == state else 0
                 risk = self.visits[target] if target is not None else 0
                 return 1 / (1 + n) - 0.4 * no_effect - 0.15 * min(risk, 5) + self.rng.random() * 0.05
@@ -103,5 +108,5 @@ class Controller:
         if len(self.action_counts) > 8192:
             self.action_counts.pop(next(iter(self.action_counts)))
         self.previous = (state, action)
-        self.expected = self.memory.predict(state, action)
+        self.expected = self.memory.predict(state, action) if self.policy != "novelty" else None
         return action

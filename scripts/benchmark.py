@@ -5,12 +5,10 @@ Exceptions are recorded and make the command fail, never count as successes.
 """
 from __future__ import annotations
 import argparse
-import importlib.util
 import json
 import logging
 import os
 import random
-import subprocess
 import sys
 import time
 from pathlib import Path
@@ -25,10 +23,8 @@ from agent.my_agent import MyAgent
 
 
 def starter_class():
-    # Read pristine baseline from git: reproducible and no hidden local file.
-    source = subprocess.check_output(
-        ["git", "show", "eeb1535404f321d280a8f9194bbc1d7aca5f05fc:agent/my_agent.py"],
-        cwd=ROOT, text=True, encoding="utf-8")
+    # Snapshot verified against the upstream commit; also works from source ZIP.
+    source = (ROOT / "baselines/starter_agent.py").read_text(encoding="utf-8")
     namespace = {"__name__": "starter_baseline"}
     exec(compile(source, "starter_baseline.py", "exec"), namespace)
     return namespace["MyAgent"]

@@ -1,5 +1,7 @@
 # Experiment log
 
+Erratum: the initial policy named novelty still consulted transition predictions, so its original rows are not a clean model-disabled ablation. They remain preserved in the raw logs. The corrected policy forbids model training and prediction while retaining raw transition evidence. Final comparisons replace the affected novelty rows with reports/novelty-corrected-v01.jsonl. A regression test enforces the boundary. The original six-policy run produced 450 rows with no per-run exceptions; memory and planning had zero model predictions and zero planned actions.
+
 Date for all initial experiments: 2026-10-24 (Asia/Calcutta). Local public development results only. No leaderboard results or hidden evaluation claims.
 
 ## SETUP-01 — official baseline and Windows portability
@@ -39,7 +41,8 @@ Date for all initial experiments: 2026-10-24 (Asia/Calcutta). Local public devel
 - Changed components: persistent policy holds IDs 1–4 for runs of length 2,4,8, stops after exact no-op, rechecks legality each step; never repeats coordinate clicks as an open-loop option.
 - Evaluation: all 25 public games, policy seeds 0,1,2, environment seed 0, 200 commands. Six policies: starter, random, novelty, memory, planning, persistent.
 - Command: `python scripts/benchmark.py --policies starter,random,novelty,memory,planning,persistent --seeds 0,1,2 --steps 200 --output reports/public-ablation-v01.jsonl`.
-- Results and decision: recorded in reports/public-ablation.md after completion. No prospective result claimed here.
+- Results: 75 runs per policy. Starter mean 0.061294 (3 level completions); random/persistent each 0.075703 (6); memory/planning each 0.149726 (4), on the 0–100 scale. No full wins. Legacy novelty rows are superseded as described in the erratum.
+- Decision: no measured benefit from persistence or planning. Do not promote them to the production default. Preserve optional variants for reproducibility.
 
 ## HYDRA-03 — click coverage under changing rendered states
 
@@ -47,7 +50,27 @@ Date for all initial experiments: 2026-10-24 (Asia/Calcutta). Local public devel
 - Components: bounded level-local click counts, least-tested candidate bonus; active only in click-only states. Other states use memory exploration.
 - Evaluation: all 25 public games, policy seeds 0,1,2, environment seed 0, 200 commands.
 - Command: `python scripts/benchmark.py --policies coverage --seeds 0,1,2 --steps 200 --output reports/coverage-v01.jsonl`.
-- Results and decision: recorded in reports/public-ablation.md after completion.
+- Results: 75 runs, 3 level completions, 0 full wins, mean local score 0.008066. All completions were r11l level 1. Zero recorded exceptions.
+- Decision: REVERT as a default candidate; cross-frame click suppression did not improve the measured objective. Retain only as an experimental policy.
+
+## HYDRA-04 — ablation correction and seed confirmation
+
+- Hypothesis: separating the novelty action-count policy from the transition model gives an interpretable ablation; additional policy seeds test whether the apparent gain repeats.
+- Correction: novelty neither trains outcome distributions nor consults their predictions. Bounded raw transition tuples are still retained for debugging.
+- Commands: `python scripts/benchmark.py --policies novelty --seeds 0,1,2,3,4 --steps 200 --output reports/novelty-corrected-v01.jsonl`; `python scripts/benchmark.py --policies memory --seeds 3,4 --steps 200 --output reports/memory-confirmation-v01.jsonl`.
+- Baseline/random confirmation: seeds 3,4 in reports/confirmation-v01.jsonl; its legacy novelty rows are superseded and excluded from the final report.
+- Evaluation: the same 25 public games, fixed environment seed 0. These are additional policy seeds, not held-out games and not evidence of hidden-set generalization.
+- Results: corrected novelty and memory each averaged 0.1491665471 over 125 runs (25 games × 5 seeds), with 9 level completions and 0 full wins. Starter averaged 0.0374617995 with 4 completions; legal random averaged 0.0584301651 with 9. On separate seeds 3,4, novelty/memory averaged 0.148328; starter 0.001714; random 0.032521. All scores are on the 0–100 scale.
+- Decision: KEEP corrected novelty as the simpler default. Transition prediction/planning remain experimental because neither improved its result. Final consolidated reports contain 525 training rows and 200 confirmation rows, all complete and without recorded exceptions. Additional policy seeds are not held-out games.
+
+## FINAL-01 — production default and notebook verification
+
+- Selected policy: corrected novelty with bounded raw transition tracking and legal action validation.
+- Command: `python scripts/play_local.py --offline --game ls20,vc33 --max-steps 50`.
+- Result: ls20 0 completed levels / 50 commands; vc33 1 completed level / 50 commands; aggregate local scorecard 0.08034894398530763. This short-ID smoke run uses the helper's normal game identifiers and is separate from full-ID seeded benchmark comparisons.
+- Tests: `python -m pytest -q` → 19 passed. An earlier final check exposed that the model-reset test implicitly relied on the old default; it now explicitly selects the memory policy it tests.
+- Packaging: `python scripts/build_notebook.py` and `python scripts/verify_notebook.py` succeeded. Bundled source imported and emitted a validated ACTION6 in a fresh isolated interpreter. `pip check` found no broken dependencies.
+- Boundary: no Kaggle token was present. No remote notebook execution, hidden competition rerun or successful competition submission has been asserted.
 
 An early persistence run started while the game cache was still populating, was interrupted, and is excluded from comparisons (reports/persistence-v01.jsonl). Complete comparisons use the stable 25-game cache. Tests, bookkeeping, portability and failure isolation are retained for correctness independently of policy score.
 

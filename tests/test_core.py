@@ -110,3 +110,14 @@ def test_click_coverage_survives_cosmetic_state_changes():
         c.observe(state)
         selected.append(c.choose(state, candidates))
     assert len(set(selected)) == 3
+
+
+def test_novelty_ablation_cannot_consult_or_train_transition_model():
+    c = Controller(seed=0, policy="novelty")
+    def forbidden(*args):
+        raise AssertionError("novelty ablation accessed transition model")
+    c.memory.predict = c.memory.record = forbidden
+    for state in ("a", "a", "b", "a"):
+        c.observe(state)
+        c.choose(state, [(1,), (2,)])
+    assert len(c.memory.history) == 3

@@ -53,7 +53,7 @@ def validate_action(choice, observation):
 class MyAgent(Agent):
     MAX_ACTIONS = 200
     MAX_SECONDS = 120.0
-    POLICY = "memory"
+    POLICY = "novelty"
     OBJECT_CLICKS = True
 
     def __init__(self, *args, **kwargs):

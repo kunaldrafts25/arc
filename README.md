@@ -10,7 +10,7 @@ PowerShell, from this directory:
 ```powershell
 ./scripts/setup_windows.ps1
 .venv/Scripts/python.exe -m pytest
-.venv/Scripts/python.exe scripts/benchmark.py --bootstrap --policies random --seeds 0 --steps 200
+.venv/Scripts/python.exe scripts/benchmark.py --bootstrap --policies novelty --seeds 0 --steps 200
 .venv/Scripts/python.exe scripts/build_notebook.py
 .venv/Scripts/python.exe scripts/verify_notebook.py
 ```

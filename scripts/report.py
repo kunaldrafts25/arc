@@ -22,7 +22,8 @@ def render(rows):
                      f"{sum(r['levels_completed'] or 0 for r in items)} | {score} | "
                      f"{median(r['runtime_seconds'] for r in items):.3f} | {sum(len(r['exceptions']) for r in items)} |")
     lines += ["", "Means are descriptive: no statistical significance or hidden-set transfer is established.",
-              "Count totals sum across seeds; they are not counts of distinct solved levels.", "", "## Per-game results", "",
+              "Count totals sum across seeds; they are not counts of distinct solved levels.",
+              "Runtime measurements are exploratory local CPU timings; some experiments overlapped, so cross-policy latency differences are not controlled hardware comparisons.", "", "## Per-game results", "",
               "| Policy | Game | Runs | Levels | Mean score | Mean loop actions |", "|---|---|---:|---:|---:|---:|"]
     for policy, items in grouped.items():
         games = defaultdict(list)

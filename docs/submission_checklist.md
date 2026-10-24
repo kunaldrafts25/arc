@@ -5,8 +5,9 @@
 ```powershell
 ./scripts/setup_windows.ps1
 .venv/Scripts/python.exe -m pytest tests -q -p no:cacheprovider
-.venv/Scripts/python.exe scripts/benchmark.py --bootstrap --policies random --seeds 0 --steps 200
+.venv/Scripts/python.exe scripts/benchmark.py --bootstrap --policies novelty --seeds 0 --steps 200
 # After the first public game cache download, omit --bootstrap for offline runs.
+.venv/Scripts/python.exe scripts/play_local.py --offline --game ls20,vc33 --max-steps 50
 .venv/Scripts/python.exe scripts/build_notebook.py
 .venv/Scripts/python.exe scripts/verify_notebook.py
 ```
@@ -35,3 +36,5 @@ For diagnosis, add `--record` to benchmark.py. The official recorder saves raw f
 7. Verify the competition rerun finishes and record its actual leaderboard result, runtime and logs before describing this as a validated competition submission.
 
 No remote notebook or competition submission has been claimed by this checklist. Notebook building preserves the official gateway workflow and packages every Hydra Python module; source validation is a useful intermediate check, not target-environment validation.
+
+Final default: novelty action-count exploration with bounded raw transition tracking. Predictive-model and BFS variants remain optional benchmark policies because they did not improve the measured score. Rebuild published comparisons with `python scripts/consolidate_experiments.py`; this excludes the superseded novelty ablation and verifies game/seed coverage before producing reports.
