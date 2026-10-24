@@ -82,7 +82,7 @@ make status
 # 8.  When status shows "complete", open the notebook on kaggle.com,
 #     find your kernel, click "Submit to Competition" in the top
 #     right, and pick `submission.parquet` from the Output File
-#     dropdown. That's one of your 5 daily submissions.
+#     dropdown. The verified competition limit is one submission per day.
 ```
 
 That's the entire loop. Steps 4–7 are what you'll repeat as you iterate;
@@ -146,7 +146,7 @@ twice.
 `make status` reports `complete`, open the kernel on kaggle.com and click
 **"Submit to Competition"** to enter Phase B and get a leaderboard score.
 
-> **You only get 5 official submissions per day**, so it pays to be
+> **You only get 1 official submission per day**, so it pays to be
 > confident before you submit: get `make play-local` passing, then submit.
 
 > **Heads up:** Before your first `make submit`, open

@@ -1,12 +1,12 @@
 # ARC-Hydra v0.1 technical report
 
-Built on 2026-10-24 in D:/compi/ARC-AGI-3-Kaggle-Starter, branch feature/arc-hydra. This is an operational local baseline. Target Kaggle execution and competition submission remain unverified.
+Built on 2026-10-24 in D:/compi/ARC-AGI-3-Kaggle-Starter, branch feature/arc-hydra. This is an operational local baseline. Kaggle version 2 completed actual public-game smoke validation and was accepted as competition submission 57601062. Its hidden evaluation status is tracked in docs/kaggle_validation.md and reports/kaggle/submission-status.json.
 
 ## What exists and has run
 
 The official starter and framework were cloned and their live interfaces inspected before replacing the agent. The implementation uses arc-agi 0.9.9 / arcengine 0.9.3 with Python 3.12.10. It has run through the real official Agent.main loop against cached public environments. The notebook embeds the complete Hydra source and imports it successfully in a separate interpreter outside the source tree.
 
-The adapter preserves MyAgent(Agent), choose_action and is_done. It filters advertised actions, validates ACTION6 coordinates, resets level-local memory at lifecycle boundaries, bounds action/time/memory/search budgets, and isolates failures to the affected game. Shared mutable action-enum payloads are restored under a lock before submission because the framework runs agents in threads.
+The adapter preserves MyAgent(Agent), choose_action and is_done. It filters advertised actions, validates ACTION6 coordinates, resets level-local memory at lifecycle boundaries, bounds action/time/memory/search budgets, and isolates failures to the affected game. Per-agent payload snapshots go directly to the actual wrapper, preserving concurrent requests without reading mutable shared enum payloads.
 
 Implemented components: lossless frame history retention, deterministic latest-image hashing with shape/level/legal-action metadata, vectorized frame differences, 4/8-neighbor color components, bounded outcome distributions, prediction falsification, count-based exploration, repeated-state diagnosis, empirical frontier BFS and one-step replanning, short action-run experiments, click-coverage experiments, and a JSONL/Markdown evaluation workflow.
 
@@ -33,7 +33,7 @@ The first ablation used ls20 and vc33, 3 policy seeds, fixed environment seed 0 
 
 All 25 public environments were then downloaded through the official API and smoke-tested at 50 commands. Full comparisons use the stable cache, equal 200-command caps and policy seeds 0,1,2. See reports/public-ablation.md for the completed comparison. Scores come directly from the installed official scorer; missing information stays unavailable. These runs are development-set experiments, not hidden validation.
 
-Nineteen Hydra tests pass, including a real-engine integration test, a simulated reset-to-level-transition-to-WIN lifecycle test and a guard preventing the novelty ablation from training/consulting the predictive model. The independent upstream recorder tests pass 19/19. The full upstream suite fails collection on four files because this framework checkout's tests reference absent agents.structs or optional openai. Original Windows source-encoding and terminal-output bugs were fixed separately from policy changes.
+Twenty-one Hydra tests pass, including a real-engine integration test, a simulated reset-to-level-transition-to-WIN lifecycle test, a model-disabled novelty guard, a concurrent-request test and competition smoke-gating behavior. The independent upstream recorder tests pass 19/19. The full upstream suite fails collection on four files because this framework checkout's tests reference absent agents.structs or optional openai. Original Windows source-encoding and terminal-output bugs were fixed separately from policy changes.
 
 The original novelty ablation accidentally consulted the model. Its raw results are retained with an erratum, and corrected reruns replace them in the final comparison. The full original run produced 450 rows with no per-run exceptions. Memory and planning produced zero confirmed model predictions and zero planned actions; BFS therefore has no demonstrated gameplay contribution in this experiment.
 
@@ -51,10 +51,10 @@ Rank is based on observed failure relevance, not a promised score gain. Short ac
 
 General goal inference, temporal object identities, transferable cross-level mechanics, A*, beam search, learned world simulators, hierarchical skills and local model assistance are not implemented. Empty modules or simulated success claims are not substituted for them. BFS is correct and tested, but useful game-solving planning has not been demonstrated. Recovery currently handles invalid predictions, resets and loops; it cannot diagnose arbitrary puzzle semantics.
 
-Development action/time caps are engineering guards, not official competition budgets. Wall-clock profiling is local CPU evidence. Hardware memory limits, installed Kaggle wheel compatibility, official deadlines and external data/model rules still need authenticated verification. No weights, hosted inference or runtime internet downloads are used by Hydra.
+Development action/time caps are engineering guards, not official competition budgets. Wall-clock profiling is local CPU evidence. Authenticated rules now confirm a nine-hour notebook limit, disabled internet and the November 2 23:59 UTC deadline; attached wheel versions and framework APIs have been inspected. Hardware RAM and hidden evaluation behavior remain unverified. No weights, hosted inference or runtime internet downloads are used by Hydra.
 
 ## Deployment boundary
 
-The generated notebooks/submission.ipynb preserves offline competition-wheel installation and gateway-driven submission generation. The private notebook metadata uses kunalsinghh25/arc-hydra-arc-agi-3. No project-local Kaggle API token was present, so no notebook upload, target execution, hidden rerun or successful competition submission is claimed. Follow docs/submission_checklist.md to complete that validation.
+The generated notebooks/submission.ipynb preserves offline competition-wheel installation and gateway-driven submission generation. The private notebook uses kunalsinghh25/arc-hydra-arc-agi-3. A configured project token authenticated; versions 1 and 2 completed on Kaggle. Version 2 also ran public-game smoke validation under the actual attached framework, taking 20 actions per game without exceptions. Submission 57601062 was accepted for competition evaluation. Commit-mode output is not a hidden score; see docs/kaggle_validation.md for scoring status.
 
 This baseline does not justify a first-place performance claim. Its value is the verified adapter, reproducible measurements, and a clear record of which additions help or fail on the public games.

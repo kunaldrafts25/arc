@@ -18,3 +18,12 @@ def test_notebook_embeds_all_hydra_sources_and_disables_internet():
     assert any("cp -r /tmp/hydra" in c["source"] for c in notebook["cells"])
     assert "--no-index" in notebook["cells"][1]["source"]
     json.dumps(notebook)
+
+
+def test_public_smoke_does_not_run_in_competition_rerun(monkeypatch):
+    monkeypatch.setenv("KAGGLE_IS_COMPETITION_RERUN", "1")
+    smoke = next(c["source"] for c in build()["cells"] if "hydra_public_smoke.json" in c["source"])
+    namespace = {}
+    exec(compile(smoke, "public_smoke_cell", "exec"), namespace)
+    assert "MyAgent" not in namespace
+    assert "arcade" not in namespace

@@ -72,6 +72,16 @@ Date for all initial experiments: 2026-10-24 (Asia/Calcutta). Local public devel
 - Packaging: `python scripts/build_notebook.py` and `python scripts/verify_notebook.py` succeeded. Bundled source imported and emitted a validated ACTION6 in a fresh isolated interpreter. `pip check` found no broken dependencies.
 - Boundary: no Kaggle token was present. No remote notebook execution, hidden competition rerun or successful competition submission has been asserted.
 
+## KAGGLE-01 — authenticated deployment
+
+- The user configured a new project-local token. Authentication and prior competition entry were confirmed without displaying credentials.
+- Verified official pages: nine-hour runtime, disabled internet, one submission/day, 110 private games, final deadline November 2 at 23:59 UTC. Attached arc-agi 0.9.8 / arcengine 0.9.3 interfaces and scorer were inspected.
+- Deployment fix: send per-agent payload copies directly to the verified wrapper so concurrent games are not serialized by a shared HTTP lock. Extend the per-game wall guard to 600 seconds; action cap stays 200. No policy-score gain is claimed from these changes.
+- Kaggle notebook v1: COMPLETE with expected commit-mode parquet.
+- Kaggle notebook v2: COMPLETE; actual offline public smoke ran 20 actions each on ls20/vc33, no exceptions. The smoke cell is skipped during competition rerun. Full local suite: 21 passed.
+- Submitted notebook v2 as competition submission 57601062. Kaggle accepted it, leaving zero daily submissions. Initial scoring status PENDING, with no score yet. Live status is recorded in reports/kaggle/submission-status.json.
+- Decision: KEEP as the first validated deployment baseline; evaluate the actual competition result before claiming hidden-set performance.
+
 An early persistence run started while the game cache was still populating, was interrupted, and is excluded from comparisons (reports/persistence-v01.jsonl). Complete comparisons use the stable 25-game cache. Tests, bookkeeping, portability and failure isolation are retained for correctness independently of policy score.
 
 ## PROFILE-01 — identify CPU cost before optimizing

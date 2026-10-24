@@ -12,3 +12,5 @@ Historical evidence is retained. Original novelty rows in ablation-v01.jsonl, pu
 final-official-smoke.txt records the selected policy in the official local helper at 50 commands per game: ls20 0 levels, vc33 1 level. Logs also preserve upstream test collection errors and the 19 passing upstream recorder tests. Binary-looking text logs are Windows UTF-16 redirected console output. profile-v01.prof is a local cProfile artifact.
 
 Rebuild final summaries with `python scripts/consolidate_experiments.py`. Its assertions enforce complete game/seed coverage, unique rows, action caps and absence of recorded per-run exceptions. Notebook generation/import checks do not certify a Kaggle submission.
+
+Kaggle follow-up: reports/kaggle/commit-v2 contains actual cloud public-smoke evidence and the runtime log. Both games ran 20 actions without exceptions. Notebook version 2 was accepted as competition submission 57601062; reports/kaggle/submission-status.json records its latest scoring status. The cloud commit parquet is a dummy artifact and is not presented as an evaluated competition score.

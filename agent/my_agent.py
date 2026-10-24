@@ -52,7 +52,7 @@ def validate_action(choice, observation):
 
 class MyAgent(Agent):
     MAX_ACTIONS = 200
-    MAX_SECONDS = 120.0
+    MAX_SECONDS = 600.0
     POLICY = "novelty"
     OBJECT_CLICKS = True
 
@@ -121,9 +121,7 @@ class MyAgent(Agent):
         return action
 
     def do_action_request(self, action: GameAction) -> FrameData:
-        # GameAction enum payloads are shared between threads. Restore this
-        # agent's immutable choice immediately before the official step call.
-        with _ACTION_LOCK:
-            action.set_data(self._payload)
-            action.reasoning = self._reasoning
-            return super().do_action_request(action)
+        # Pass per-agent snapshots directly: the attached framework reads mutable
+        # enum payloads, and a lock around its HTTP request serializes every game.
+        raw = self.arc_env.step(action, data=self._payload.copy(), reasoning=self._reasoning.copy())
+        return self._convert_raw_frame_data(raw)

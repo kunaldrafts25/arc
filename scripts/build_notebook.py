@@ -146,6 +146,49 @@ def build() -> dict:
     )
     run_cell = code_cell(run_cell_source)
 
+    public_smoke_cell = code_cell(dedent('''\
+        import os
+        if not os.getenv('KAGGLE_IS_COMPETITION_RERUN'):
+            import json
+            import shutil
+            import sys
+            from pathlib import Path
+
+            data_root = Path('/kaggle/input/competitions/arc-prize-2026-arc-agi-3')
+            stage = Path('/tmp/arc-hydra-public-smoke')
+            shutil.copytree(data_root / 'ARC-AGI-3-Agents', stage,
+                            ignore=shutil.ignore_patterns('.git', '__pycache__'), dirs_exist_ok=True)
+            (stage / 'agents' / '__init__.py').write_text('from .agent import Agent\\n', encoding='utf-8')
+            shutil.copytree('/tmp/hydra', stage / 'hydra', dirs_exist_ok=True)
+            shutil.copy('/tmp/my_agent.py', stage / 'my_agent.py')
+            sys.path.insert(0, str(stage))
+            from my_agent import MyAgent
+            from arc_agi import Arcade, OperationMode
+            from arcengine import GameState
+
+            arcade = Arcade(operation_mode=OperationMode.OFFLINE,
+                            environments_dir=str(data_root / 'environment_files'),
+                            recordings_dir=str(stage / 'recordings'))
+            games = arcade.get_environments()
+            results = []
+            for prefix in ('ls20', 'vc33'):
+                game_id = next(g.game_id for g in games if g.game_id.split('-')[0] == prefix)
+                environment = arcade.make(game_id, seed=0)
+                if environment is None:
+                    raise RuntimeError('Could not create public smoke environment: ' + game_id)
+                agent = MyAgent(card_id='public-smoke', game_id=game_id, agent_name='hydra-public-smoke',
+                                ROOT_URL='http://localhost', record=False, arc_env=environment)
+                agent.MAX_ACTIONS = 20
+                agent.main()
+                if agent.errors or (agent.action_counter != 20 and agent.frames[-1].state != GameState.WIN):
+                    raise RuntimeError('Public smoke failed: ' + repr(agent.errors))
+                results.append(dict(game_id=game_id, actions=agent.action_counter,
+                                    levels_completed=agent.frames[-1].levels_completed,
+                                    policy=agent.controller.policy, exceptions=agent.errors))
+            Path('/kaggle/working/hydra_public_smoke.json').write_text(json.dumps(results, indent=2))
+            print(json.dumps(results, indent=2))
+        '''))
+
     dummy_submission_cell = code_cell(
         dedent(
             """\
@@ -205,6 +248,7 @@ def build() -> dict:
             write_hydra_cell,
             write_agent_cell,
             run_cell,
+            public_smoke_cell,
             dummy_submission_cell,
         ],
     }

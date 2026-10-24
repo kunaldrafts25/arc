@@ -21,20 +21,22 @@ For diagnosis, add `--record` to benchmark.py. The official recorder saves raw f
 - Actual official engine public gameplay: executed.
 - Unit tests, lifecycle and payload validation: executed.
 - Notebook source extraction/import outside source tree: executed.
-- Target Kaggle wheel versions, GPU/RAM/time budget, rules acceptance and hidden rerun: NOT VERIFIED.
+- Authenticated rules/file access, nine-hour runtime, offline restriction and attached wheel versions: verified; hardware RAM and hidden rerun remain unverified.
 - Kaggle username: kunalsinghh25; private notebook ID kunalsinghh25/arc-hydra-arc-agi-3.
-- Project-local Kaggle token: absent at initial inspection. Never paste tokens into chat or commit them.
+- Project-local Kaggle token: configured and validated after initial inspection. Authentication is handled by scripts/kaggle_local.py.
+- Notebook version 2: COMPLETE; public smoke passed in the actual Kaggle environment, 20 actions per game and no exceptions.
+- Competition submission: accepted as 57601062; read reports/kaggle/submission-status.json for scoring status. Daily allowance is now zero.
 
 ## Remote workflow
 
-1. Authenticate Kaggle locally and accept the competition rules through Kaggle. Confirm external data/model permissions, runtime, action limits and actual deadline against the authenticated rules. The webpage was not readable through the research tool.
+1. Authentication and competition entry are confirmed. The authenticated SDK pages supplied rules and runtime/deadline requirements; per-game action limits and hardware RAM remain unverified.
 2. Keep the competition attachment and internet disabled in notebooks/kernel-metadata.json. No external model weights are needed.
 3. Build the notebook again after every agent/source change.
-4. Use the official `make submit` on a POSIX environment, or install the Kaggle CLI in the project venv and use `kaggle kernels push -p notebooks` on Windows with local authentication configured. The original Makefile expects .kaggle/access_token and exports it as KAGGLE_API_TOKEN; do not print its content.
+4. Use `.venv/Scripts/python.exe scripts/kaggle_local.py kernels push -p notebooks --accelerator NvidiaTeslaT4 --timeout 32400` on Windows. The wrapper reads .kaggle/access_token internally. Only one competition submission per day is allowed; notebook Save/Run is a separate validation stage.
 5. Track `kaggle kernels status kunalsinghh25/arc-hydra-arc-agi-3`. Save/run success checks commit execution; it does not execute the hidden game loop.
 6. Inspect output, then select **Submit to Competition** and **submission.parquet** through Kaggle. Do not submit a hand-written score file. The gateway produces actual gameplay results during rerun.
 7. Verify the competition rerun finishes and record its actual leaderboard result, runtime and logs before describing this as a validated competition submission.
 
-No remote notebook or competition submission has been claimed by this checklist. Notebook building preserves the official gateway workflow and packages every Hydra Python module; source validation is a useful intermediate check, not target-environment validation.
+See docs/kaggle_validation.md for remote notebook and competition status. The notebook preserves the official gateway workflow, packages every Hydra module and now runs an offline public-game smoke test during commit mode. Successful commit mode does not establish a hidden competition score.
 
 Final default: novelty action-count exploration with bounded raw transition tracking. Predictive-model and BFS variants remain optional benchmark policies because they did not improve the measured score. Rebuild published comparisons with `python scripts/consolidate_experiments.py`; this excludes the superseded novelty ablation and verifies game/seed coverage before producing reports.

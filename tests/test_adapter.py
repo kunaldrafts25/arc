@@ -69,7 +69,7 @@ def test_full_reset_empty_frames_and_unknown_actions():
     assert not a.errors
 
 
-def test_shared_enum_payload_is_restored_before_environment_call():
+def test_per_agent_payload_ignores_mutated_shared_enum():
     class Capture:
         def step(self, action, data, reasoning):
             self.data = data.copy()
@@ -84,6 +84,24 @@ def test_shared_enum_payload_is_restored_before_environment_call():
     second.do_action_request(GameAction.ACTION6)
     assert first_env.data["x"] == 2
     assert second_env.data["x"] == 61
+
+
+def test_separate_games_can_submit_concurrently():
+    from concurrent.futures import ThreadPoolExecutor
+    import threading
+    barrier = threading.Barrier(2)
+    class ParallelEnvironment:
+        def step(self, action, data, reasoning):
+            barrier.wait(timeout=3)
+            self.x = data["x"]
+            return FrameDataRaw(game_id="test", available_actions=[6])
+    envs = [ParallelEnvironment(), ParallelEnvironment()]
+    agents = [agent(env=env) for env in envs]
+    for index, a in enumerate(agents):
+        a._payload = {"x": index, "y": 0}
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        results = list(executor.map(lambda a: a.do_action_request(GameAction.ACTION6), agents))
+    assert [env.x for env in envs] == [0, 1]
 
 
 def test_environment_failure_is_recorded_without_crashing_other_games():
