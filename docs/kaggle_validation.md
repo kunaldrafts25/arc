@@ -26,6 +26,8 @@ Command: `python scripts/kaggle_local.py competitions submit arc-prize-2026-arc-
 
 Kaggle accepted submission **57601062** and reported zero submissions remaining today. At the first status checks it was PENDING, with empty public/private score fields and no error. Acceptance is not a scored result. reports/kaggle/submission-status.json and its history record subsequent checks.
 
+Subsequently the official status API confirmed **COMPLETE**, public score **0.01**, no private score and no evaluation error. The submitted-artifact endpoint returned HTTP 403, so hidden per-game diagnostics are unavailable. See reports/kaggle/result-analysis.md for the result, controlled action-budget experiment and limitations. No further artifact-access route was attempted.
+
 Local tests after the smoke-gating check: 21 passed. The gate test verifies public smoke is skipped during a competition rerun.
 
 ## Reproducible commands

@@ -2,6 +2,8 @@
 
 Built on 2026-10-24 in D:/compi/ARC-AGI-3-Kaggle-Starter, branch feature/arc-hydra. This is an operational local baseline. Kaggle version 2 completed actual public-game smoke validation and was accepted as competition submission 57601062. Its hidden evaluation status is tracked in docs/kaggle_validation.md and reports/kaggle/submission-status.json.
 
+Actual competition result: submission 57601062 is COMPLETE with public score 0.01 and no reported evaluation error. Hidden per-game diagnostics were not accessible. The result is far from competitive. A subsequent four-game budget trial increased commands fivefold with negligible mean-score gain and no full game wins; the next priority is mechanics and goal inference. The local timer-start correctness fix is not part of the scored version. See reports/kaggle/result-analysis.md.
+
 ## What exists and has run
 
 The official starter and framework were cloned and their live interfaces inspected before replacing the agent. The implementation uses arc-agi 0.9.9 / arcengine 0.9.3 with Python 3.12.10. It has run through the real official Agent.main loop against cached public environments. The notebook embeds the complete Hydra source and imports it successfully in a separate interpreter outside the source tree.

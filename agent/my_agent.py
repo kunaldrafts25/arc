@@ -78,6 +78,9 @@ class MyAgent(Agent):
                 or time.monotonic() - self.started >= self.MAX_SECONDS)
 
     def main(self):
+        # Swarm constructs every game before starting any agent thread. Exclude
+        # that setup wait from this instance's decision-time allowance.
+        self.started = time.monotonic()
         try:
             super().main()
         except Exception as error:

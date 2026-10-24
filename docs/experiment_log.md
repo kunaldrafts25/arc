@@ -82,6 +82,24 @@ Date for all initial experiments: 2026-10-24 (Asia/Calcutta). Local public devel
 - Submitted notebook v2 as competition submission 57601062. Kaggle accepted it, leaving zero daily submissions. Initial scoring status PENDING, with no score yet. Live status is recorded in reports/kaggle/submission-status.json.
 - Decision: KEEP as the first validated deployment baseline; evaluate the actual competition result before claiming hidden-set performance.
 
+## KAGGLE-RESULT-01 — first scored submission
+
+- Submission: 57601062, notebook version 2.
+- Official API result: COMPLETE; public score 0.01; private score unavailable; evaluation error empty.
+- Own-submission download: HTTP 403. Per-game metrics remain unavailable; no alternative access path was attempted.
+- Interpretation: valid scored baseline with weak performance; do not infer hidden completion/action counts or assign a specific failure cause from this aggregate alone.
+
+## BUDGET-01 — test the 200-action guard
+
+- Hypothesis: the small development cap substantially limits completion.
+- Components changed: benchmark cap only, 200 versus 1,000 commands; same novelty policy and official loop.
+- Games: cd82, ls20, r11l, vc33; policy seeds 0,1,2; environment seed 0.
+- Baseline: 12 runs, 2,400 commands, 4 completed levels, 0 full wins, mean local score 0.9357866260, median runtime 1.812 s.
+- Candidate: 12 runs, 12,000 commands, 6 completed levels, 0 full wins, mean local score 0.9359760621, median runtime 7.1015 s.
+- Exceptions: 0. Failures: cd82 and ls20 remain unsolved; r11l stops at one completed level; two additional vc33 first-level completions are highly inefficient.
+- Decision: INVESTIGATE mechanics/goal inference next; do not promote the fivefold cap globally from this small gain on four games.
+- Independent guard fix: start the per-game timer when main begins, excluding Swarm construction waits. Local behavioral test verifies play still occurs after a simulated long setup wait. 22 tests pass. No hidden-score benefit is claimed; this source change has not been submitted.
+
 An early persistence run started while the game cache was still populating, was interrupted, and is excluded from comparisons (reports/persistence-v01.jsonl). Complete comparisons use the stable 25-game cache. Tests, bookkeeping, portability and failure isolation are retained for correctness independently of policy score.
 
 ## PROFILE-01 — identify CPU cost before optimizing

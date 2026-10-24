@@ -111,6 +111,22 @@ def test_environment_failure_is_recorded_without_crashing_other_games():
     assert a.action_counter == 0
 
 
+def test_waiting_for_other_agents_does_not_exhaust_play_budget():
+    class Environment:
+        def __init__(self):
+            self.observation_space = FrameDataRaw(game_id="test", state=GameState.NOT_FINISHED,
+                                                 available_actions=[1])
+            self.observation_space.frame = [np.zeros((64, 64), dtype=np.int16)]
+        def step(self, action, data, reasoning):
+            return self.observation_space
+    a = agent(env=Environment())
+    a.started = time.monotonic() - a.MAX_SECONDS - 1
+    a.MAX_ACTIONS = 2
+    a.main()
+    assert a.action_counter == 2
+    assert not a.errors
+
+
 def test_official_loop_through_simulated_reset_level_transition_and_win():
     class Lifecycle:
         def __init__(self):
