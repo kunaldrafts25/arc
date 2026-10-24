@@ -1,0 +1,43 @@
+# ARC-Hydra v0.1 technical report
+
+Built on 2026-10-24 in D:/compi/ARC-AGI-3-Kaggle-Starter, branch feature/arc-hydra. This is an operational local baseline. Target Kaggle execution and competition submission remain unverified.
+
+## What exists and has run
+
+The official starter and framework were cloned and their live interfaces inspected before replacing the agent. The implementation uses arc-agi 0.9.9 / arcengine 0.9.3 with Python 3.12.10. It has run through the real official Agent.main loop against cached public environments. The notebook embeds the complete Hydra source and imports it successfully in a separate interpreter outside the source tree.
+
+The adapter preserves MyAgent(Agent), choose_action and is_done. It filters advertised actions, validates ACTION6 coordinates, resets level-local memory at lifecycle boundaries, bounds action/time/memory/search budgets, and isolates failures to the affected game. Shared mutable action-enum payloads are restored under a lock before submission because the framework runs agents in threads.
+
+Implemented components: lossless frame history retention, deterministic latest-image hashing with shape/level/legal-action metadata, vectorized frame differences, 4/8-neighbor color components, bounded outcome distributions, prediction falsification, count-based exploration, repeated-state diagnosis, empirical frontier BFS and one-step replanning, short action-run experiments, click-coverage experiments, and a JSONL/Markdown evaluation workflow.
+
+The controller modes describe actual action selection, not inferred semantic understanding. Its frontier goal is an observed state with untested actions; it has no verified general game-goal recognizer. A repeated image does not prove that the hidden game state is identical. Contradictory transitions disable deterministic prediction.
+
+## Measurement
+
+The first ablation used ls20 and vc33, 3 policy seeds, fixed environment seed 0 and equal 200-command caps. Across six runs per policy, the pristine starter completed zero levels, legal random completed three, and novelty, memory and planning each completed one. No full games were won. Legal random's mean local score was 0.028675 on the 0–100 scale. Full raw scorecards are in reports/ablation-v01.jsonl.
+
+All 25 public environments were then downloaded through the official API and smoke-tested at 50 commands. Full comparisons use the stable cache, equal 200-command caps and policy seeds 0,1,2. See reports/public-ablation.md for the completed comparison. Scores come directly from the installed official scorer; missing information stays unavailable. These runs are development-set experiments, not hidden validation.
+
+Eighteen Hydra tests pass, including a real-engine integration test and a simulated reset-to-level-transition-to-WIN lifecycle test. The independent upstream recorder tests pass 19/19. The full upstream suite fails collection on four files because this framework checkout's tests reference absent agents.structs or optional openai. Original Windows source-encoding and terminal-output bugs were fixed separately from policy changes.
+
+## Largest observed bottlenecks
+
+| Rank | Evidence / implication | Next experiment | Expected cost |
+|---|---|---|---|
+| 1 | Very low completion; state/action novelty does not identify the game objective | Learn controllable-object motion and test several explicit reach/collect/transform hypotheses against actual feedback | Several focused development days; score benefit unknown |
+| 2 | Full rendered states seldom repeat in initial games; empirical planning has little validated graph coverage | Compare robust visual abstractions with raw frames, retaining contradictory outcomes and checking action usefulness | 1–2 days; risk of merging mechanically distinct states |
+| 3 | Click candidates include background/decorative components; extraction dominated one CPU profile | Compare candidate quality and cross-frame click coverage; optimize labeling only if target runtime requires it | Hours to days; coverage experiment already measured below baseline |
+
+Rank is based on observed failure relevance, not a promised score gain. Short action persistence and cross-frame click coverage are the first cheap, measurable attempts to address ineffective exploration. More complex methods need evidence before becoming defaults.
+
+## Limitations and deferred work
+
+General goal inference, temporal object identities, transferable cross-level mechanics, A*, beam search, learned world simulators, hierarchical skills and local model assistance are not implemented. Empty modules or simulated success claims are not substituted for them. BFS is correct and tested, but useful game-solving planning has not been demonstrated. Recovery currently handles invalid predictions, resets and loops; it cannot diagnose arbitrary puzzle semantics.
+
+Development action/time caps are engineering guards, not official competition budgets. Wall-clock profiling is local CPU evidence. Hardware memory limits, installed Kaggle wheel compatibility, official deadlines and external data/model rules still need authenticated verification. No weights, hosted inference or runtime internet downloads are used by Hydra.
+
+## Deployment boundary
+
+The generated notebooks/submission.ipynb preserves offline competition-wheel installation and gateway-driven submission generation. The private notebook metadata uses kunalsinghh25/arc-hydra-arc-agi-3. No project-local Kaggle API token was present, so no notebook upload, target execution, hidden rerun or successful competition submission is claimed. Follow docs/submission_checklist.md to complete that validation.
+
+This baseline does not justify a first-place performance claim. Its value is the verified adapter, reproducible measurements, and a clear record of which additions help or fail on the public games.

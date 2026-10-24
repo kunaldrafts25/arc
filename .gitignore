@@ -20,3 +20,7 @@ reference/
 .DS_Store
 .idea/
 .vscode/
+.tmp/
+.pytest_cache/
+test-artifacts/
+pytest-cache-files-*/

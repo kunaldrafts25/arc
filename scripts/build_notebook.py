@@ -61,7 +61,19 @@ def markdown_cell(source: str) -> dict:
 def build() -> dict:
     if not AGENT_SRC.exists():
         raise SystemExit(f"Could not find {AGENT_SRC}")
-    agent_body = AGENT_SRC.read_text()
+    agent_body = AGENT_SRC.read_text(encoding="utf-8")
+    hydra_sources = {
+        str(path.relative_to(ROOT)).replace("\\", "/"): path.read_text(encoding="utf-8")
+        for path in sorted((ROOT / "hydra").rglob("*.py"))
+    }
+    write_hydra_cell = code_cell(
+        "from pathlib import Path\n"
+        "HYDRA_SOURCES = " + repr(hydra_sources) + "\n"
+        "for relative, source in HYDRA_SOURCES.items():\n"
+        "    target = Path('/tmp') / relative\n"
+        "    target.parent.mkdir(parents=True, exist_ok=True)\n"
+        "    target.write_text(source, encoding='utf-8')\n"
+    )
 
     install_cell = code_cell(
         "!pip install --no-index --find-links \\\n"
@@ -91,6 +103,7 @@ def build() -> dict:
                    /kaggle/working/ARC-AGI-3-Agents
 
             # Drop our agent in as a framework template.
+            !cp -r /tmp/hydra /kaggle/working/ARC-AGI-3-Agents/hydra
             !cp /tmp/my_agent.py \\
                 /kaggle/working/ARC-AGI-3-Agents/agents/templates/my_agent.py
 
@@ -189,6 +202,7 @@ def build() -> dict:
                 "`make submit`."
             ),
             install_cell,
+            write_hydra_cell,
             write_agent_cell,
             run_cell,
             dummy_submission_cell,

@@ -1,3 +1,28 @@
+# ARC-Hydra v0.1
+
+Development branch: `feature/arc-hydra`. The agent uses the official framework,
+observed frames and advertised actions. Hydra modules are bundled by the official
+notebook builder. Public local measurements and target validation status are in
+[the technical report](docs/technical_report.md).
+
+PowerShell, from this directory:
+
+```powershell
+./scripts/setup_windows.ps1
+.venv/Scripts/python.exe -m pytest
+.venv/Scripts/python.exe scripts/benchmark.py --bootstrap --policies random --seeds 0 --steps 200
+.venv/Scripts/python.exe scripts/build_notebook.py
+.venv/Scripts/python.exe scripts/verify_notebook.py
+```
+
+Use `--bootstrap` only when downloading public games; subsequent benchmark runs
+are offline. See [deployment instructions](docs/submission_checklist.md),
+[source audit](docs/starter_audit.md), [competition requirements](docs/competition_specification.md)
+and [experiment log](docs/experiment_log.md). The Kaggle notebook is configured for
+`kunalsinghh25/arc-hydra-arc-agi-3` and requires local authentication and target validation.
+
+The original starter guide follows.
+
 # ARC Prize 2026 — Local Dev Starter
 
 **Go from zero to your first Kaggle submission in about 10 minutes, without
