@@ -14,7 +14,7 @@ jobs live. This continuation found and launched a separate model experiment.
 | Exact job | Last official status | Observer session |
 |---|---|---|
 | `kunalsinghh25/arc-hydra-duck-summary/1` | RUNNING, waiting for model readiness | 98131 |
-| `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/4` | RUNNING, native FlashInfer compilation stage | 72918 |
+| `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/4` | RUNNING, native FlashInfer compilation stage | 12606 |
 | `kunalsinghh25/arc-hydra-duck-swift/1` | RUNNING, split input checks passed, offline runtime installation | 11072 |
 
 Logs are `reports/kaggle/duck-summary-v1/live.log`,
@@ -22,6 +22,10 @@ Logs are `reports/kaggle/duck-summary-v1/live.log`,
 `reports/kaggle/duck-swift-v1/live.log`. CPU log reconnect errors are observation
 failures; authoritative status confirms the job is still running. Never restart
 one of these versions just because startup or compilation takes time.
+At approximately 18:24 UTC the CPU observer exhausted its reconnect attempts.
+The exact cloud job was verified RUNNING and only the observer was reconnected
+(new session 12606). Summary and Swift startup logs continue advancing within
+their existing allowances; no new game result is available yet.
 
 Swift 1.5 is a public reasoning-efficient derivative. An existing AutoRound INT4
 mirror permits a target-only experiment with the original runtime/draft rather
