@@ -5,7 +5,7 @@
 ```powershell
 ./scripts/setup_windows.ps1
 .venv/Scripts/python.exe -m pytest tests -q -p no:cacheprovider
-.venv/Scripts/python.exe scripts/benchmark.py --bootstrap --policies novelty --seeds 0 --steps 200
+.venv/Scripts/python.exe scripts/benchmark.py --bootstrap --policies reasoning --seeds 0 --steps 300
 # After the first public game cache download, omit --bootstrap for offline runs.
 .venv/Scripts/python.exe scripts/play_local.py --offline --game ls20,vc33 --max-steps 50
 .venv/Scripts/python.exe scripts/build_notebook.py
@@ -24,8 +24,8 @@ For diagnosis, add `--record` to benchmark.py. The official recorder saves raw f
 - Authenticated rules/file access, nine-hour runtime, offline restriction and attached wheel versions: verified; hardware RAM and hidden rerun remain unverified.
 - Kaggle username: kunalsinghh25; private notebook ID kunalsinghh25/arc-hydra-arc-agi-3.
 - Project-local Kaggle token: configured and validated after initial inspection. Authentication is handled by scripts/kaggle_local.py.
-- Notebook version 2: COMPLETE; public smoke passed in the actual Kaggle environment, 20 actions per game and no exceptions.
-- Competition submission: accepted as 57601062; read reports/kaggle/submission-status.json for scoring status. Daily allowance is now zero.
+- Notebook version 3: COMPLETE; FT09 full WIN in 159 actions plus two 20-action smoke checks, no exceptions.
+- Previous competition submission 57601062: COMPLETE, score 0.01. Verify the current allowance through the official CLI before entering a candidate.
 
 ## Remote workflow
 
@@ -39,4 +39,7 @@ For diagnosis, add `--record` to benchmark.py. The official recorder saves raw f
 
 See docs/kaggle_validation.md for remote notebook and competition status. The notebook preserves the official gateway workflow, packages every Hydra module and now runs an offline public-game smoke test during commit mode. Successful commit mode does not establish a hidden competition score.
 
-Final default: novelty action-count exploration with bounded raw transition tracking. Predictive-model and BFS variants remain optional benchmark policies because they did not improve the measured score. Rebuild published comparisons with `python scripts/consolidate_experiments.py`; this excludes the superseded novelty ablation and verifies game/seed coverage before producing reports.
+The v0.2 candidate default is reasoning with a 300-action guard. The old novelty
+policy remains available for comparisons. `scripts/consolidate_experiments.py`
+rebuilds the historical v0.1 comparison only; v0.2 results and source snapshots
+are under `reports/v02`, described in `docs/v02_development.md`.

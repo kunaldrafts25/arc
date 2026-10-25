@@ -1,5 +1,18 @@
 # Kaggle validation — 2026-10-24
 
+## Version 3 — 25 October 2026
+
+Private notebook COMPLETE. The v0.2 reasoning candidate completed all six FT09
+levels in 159 actions, ending in official WIN, with no exceptions in the actual
+offline Kaggle runtime. LS20 and VC33 each executed 20 smoke actions without
+exceptions. Outputs and runtime log are in `reports/kaggle/commit-v3`.
+The FT09 commit-mode regression now requires a full win. Competition reruns
+skip the public smoke and retain the official gateway workflow.
+
+The candidate uses reasoning with a 300-action guard. This is target runtime
+validation on public data, not a new leaderboard result. An official allowance
+check on 25 October returned one competition submission remaining.
+
 Account/notebook: https://www.kaggle.com/code/kunalsinghh25/arc-hydra-arc-agi-3
 
 Authentication succeeded using the gitignored project-local token. Competition entry and file access are confirmed. No credentials are embedded in source, notebook, logs, or release packaging.

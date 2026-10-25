@@ -1,16 +1,20 @@
-# ARC-Hydra v0.1
+# ARC-Hydra v0.2
 
-Development branch: `feature/arc-hydra`. The agent uses the official framework,
+Development branch: `feature/arc-hydra-v02`. The agent uses the official framework,
 observed frames and advertised actions. Hydra modules are bundled by the official
 notebook builder. Public local measurements and target validation status are in
-[the technical report](docs/technical_report.md).
+[the technical report](docs/technical_report.md). The v0.2 candidate adds learned
+motion and tile mechanics, visual goal inference and verified linear plans.
+It completes the public FT09 game in local tests and Kaggle's offline runtime;
+see [v0.2 development evidence](docs/v02_development.md). Hidden performance
+remains unmeasured for v0.2; the previous submission scored 0.01.
 
 PowerShell, from this directory:
 
 ```powershell
 ./scripts/setup_windows.ps1
 .venv/Scripts/python.exe -m pytest
-.venv/Scripts/python.exe scripts/benchmark.py --bootstrap --policies novelty --seeds 0 --steps 200
+.venv/Scripts/python.exe scripts/benchmark.py --bootstrap --policies reasoning --seeds 0 --steps 300
 .venv/Scripts/python.exe scripts/build_notebook.py
 .venv/Scripts/python.exe scripts/verify_notebook.py
 ```

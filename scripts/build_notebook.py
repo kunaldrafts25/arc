@@ -171,20 +171,24 @@ def build() -> dict:
                             recordings_dir=str(stage / 'recordings'))
             games = arcade.get_environments()
             results = []
-            for prefix in ('ls20', 'vc33'):
+            for prefix in ('ft09', 'ls20', 'vc33'):
                 game_id = next(g.game_id for g in games if g.game_id.split('-')[0] == prefix)
                 environment = arcade.make(game_id, seed=0)
                 if environment is None:
                     raise RuntimeError('Could not create public smoke environment: ' + game_id)
                 agent = MyAgent(card_id='public-smoke', game_id=game_id, agent_name='hydra-public-smoke',
                                 ROOT_URL='http://localhost', record=False, arc_env=environment)
-                agent.MAX_ACTIONS = 20
+                budget = 300 if prefix == 'ft09' else 20
+                agent.MAX_ACTIONS = budget
                 agent.main()
-                if agent.errors or (agent.action_counter != 20 and agent.frames[-1].state != GameState.WIN):
+                if agent.errors or (agent.action_counter != budget and agent.frames[-1].state != GameState.WIN):
                     raise RuntimeError('Public smoke failed: ' + repr(agent.errors))
+                if prefix == 'ft09' and agent.frames[-1].state != GameState.WIN:
+                    raise RuntimeError('Public puzzle regression: expected a verified full-game win')
                 results.append(dict(game_id=game_id, actions=agent.action_counter,
                                     levels_completed=agent.frames[-1].levels_completed,
-                                    policy=agent.controller.policy, exceptions=agent.errors))
+                                    policy=agent.feature_policy, final_state=agent.frames[-1].state.name,
+                                    exceptions=agent.errors))
             Path('/kaggle/working/hydra_public_smoke.json').write_text(json.dumps(results, indent=2))
             print(json.dumps(results, indent=2))
         '''))

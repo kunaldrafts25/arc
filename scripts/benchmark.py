@@ -11,6 +11,7 @@ import os
 import random
 import sys
 import time
+from hashlib import sha256
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,6 +38,12 @@ def run(args):
     if args.record:
         os.environ["RECORDINGS_DIR"] = str(ROOT / "recordings")
     rows = []
+    sources = {p.relative_to(ROOT).as_posix():p.read_text(encoding="utf-8")
+               for p in sorted((ROOT/"hydra").rglob("*.py"))}
+    sources["agent/my_agent.py"] = (ROOT/"agent/my_agent.py").read_text(encoding="utf-8")
+    encoded_sources = json.dumps(sources, sort_keys=True)
+    source_digest = sha256(encoded_sources.encode()).hexdigest()
+    output.with_suffix(".source.json").write_text(encoded_sources, encoding="utf-8")
     policies = args.policies.split(",")
     for policy in policies:
         for seed in map(int, args.seeds.split(",")):
@@ -53,7 +60,8 @@ def run(args):
                     raise ValueError(f"Requested games unavailable: {sorted(missing)}")
             for game_id in game_ids:
                 started = time.monotonic()
-                row = dict(agent_version="0.1.0", policy=policy, game_id=game_id, seed=seed,
+                row = dict(agent_version="0.2.0-dev" if policy in ("abstract", "motion", "clicks", "reasoning") else "0.1.0",
+                           source_sha256=source_digest, policy=policy, game_id=game_id, seed=seed,
                            completion_status=None, levels_completed=None, action_count=None,
                            human_reference_actions=None, official_score_if_available=None,
                            estimated_score=None, exceptions=[], level_completions=[])
@@ -138,7 +146,7 @@ if __name__ == "__main__":
     parser.add_argument("--record", action="store_true", help="Save official frame/action recordings for diagnosis")
     parser.add_argument("--output", default="reports/benchmark.jsonl")
     args = parser.parse_args()
-    allowed = {"starter", "random", "novelty", "memory", "planning", "persistent", "coverage"}
+    allowed = {"starter", "random", "novelty", "memory", "planning", "persistent", "coverage", "abstract", "motion", "clicks", "reasoning"}
     if args.steps <= 0 or not set(args.policies.split(",")) <= allowed:
         parser.error("positive steps and supported policies required")
     raise SystemExit(run(args))

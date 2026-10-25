@@ -16,7 +16,7 @@ def normalize(observation):
     return frames
 
 
-def state_key(observation):
+def state_key(observation, grid_override=None):
     # Latest rendered image is the decision state. Preserve complete animation
     # frames separately; including their count would split identical end states.
     frames = normalize(observation)
@@ -24,9 +24,10 @@ def state_key(observation):
     h.update(str((getattr(observation, "levels_completed", 0),
                   str(getattr(observation, "state", "")),
                   tuple(getattr(observation, "available_actions", []) or []))).encode())
-    if frames:
-        h.update(str(frames[-1].shape).encode())
-        h.update(frames[-1].tobytes())
+    grid = grid_override if grid_override is not None else (frames[-1] if frames else None)
+    if grid is not None:
+        h.update(str(grid.shape).encode())
+        h.update(grid.tobytes())
     return h.hexdigest()
 
 
@@ -38,7 +39,7 @@ def grid_diff(previous, current):
     return {"changed_cells": int(xs.size), "bbox": bbox, "shape_changed": False}
 
 
-def components(grid, connectivity=4, limit=256):
+def components(grid, connectivity=4, limit=256, describe=False):
     """Color components including background; no semantic identity assumed.
 
     Iterative flood fill is bounded by grid size. Vectorized color segmentation
@@ -69,8 +70,15 @@ def components(grid, connectivity=4, limit=256):
         # Pick a real component pixel nearest centroid, including concave shapes.
         center = coords.mean(axis=0)
         py, px = coords[np.argmin(((coords - center) ** 2).sum(axis=1))]
-        objects.append({"color": int(color), "area": len(pixels),
+        obj = {"color": int(color), "area": len(pixels),
                         "point": (int(px), int(py)),
                         "bbox": (int(coords[:, 1].min()), int(coords[:, 0].min()),
-                                 int(coords[:, 1].max()), int(coords[:, 0].max()))})
+                                 int(coords[:, 1].max()), int(coords[:, 0].max()))}
+        if describe:
+            x0, y0, x1, y1 = obj["bbox"]
+            mask = np.zeros((y1-y0+1, x1-x0+1), dtype=np.uint8)
+            mask[coords[:, 0]-y0, coords[:, 1]-x0] = 1
+            obj["shape"] = (mask.shape, blake2b(mask.tobytes(), digest_size=8).hexdigest())
+            obj["centroid"] = (float(center[1]), float(center[0]))
+        objects.append(obj)
     return sorted(objects, key=lambda obj: obj["area"])[:limit]
