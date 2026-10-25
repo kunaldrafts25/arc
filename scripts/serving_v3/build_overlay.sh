@@ -12,6 +12,25 @@ if [[ ! -d "$BASE" ]]; then BASE=/kaggle/input/pennyroyal-v253; fi
 [[ -d "$BASE/wheels" ]]
 NOTEBOOK_PY="$(command -v python)"
 "$NOTEBOOK_PY" -c 'import sys; assert sys.version_info[:2]==(3,12); print(sys.version)'
+if [[ -n "${HYDRA_REUSE_WHEEL_SHA256:-}" ]]; then
+  # Check the attachment before spending time preparing the toolchain.
+  "$NOTEBOOK_PY" - "$OUT/wheels" "$HYDRA_REUSE_WHEEL_SHA256" <<'PY'
+from hashlib import sha256
+from pathlib import Path
+import shutil,sys
+name='sglang-0.5.19+g560edbdca18a-cp312-cp312-linux_x86_64.whl'
+slug='arc-hydra-retained-v3-native-wheel'
+roots=[Path('/kaggle/input/datasets/kunalsinghh25')/slug,Path('/kaggle/input')/slug]
+# Kaggle strips '+' from uploaded dataset filenames. Verify contents before
+# restoring the valid PEP 427 wheel name used by the original build.
+matches=list({p.resolve() for root in roots for filename in (name,name.replace('+',''))
+              if (p:=root/filename).is_file()})
+assert len(matches)==1, f'Expected one retained native wheel, found {matches}'
+assert sha256(matches[0].read_bytes()).hexdigest()==sys.argv[2], 'Retained wheel hash mismatch'
+shutil.copy2(matches[0],Path(sys.argv[1])/name)
+print('Reused hash-verified native runtime wheel',flush=True)
+PY
+fi
 export UV_HTTP_TIMEOUT=300 UV_HTTP_RETRIES=3 UV_PYTHON_DOWNLOADS=never UV_LINK_MODE=copy
 export PIP_DEFAULT_TIMEOUT=300 PIP_RETRIES=3 PYTHONNOUSERSITE=1
 unset PYTHONPATH UV_SYSTEM_PYTHON
@@ -92,6 +111,7 @@ PY
 git -C "$ROOT/source" diff > "$OUT/int4-compatibility.patch"
 cp "$ROOT/source/LICENSE" "$OUT/licenses/sglang-LICENSE"
 
+if [[ -z "${HYDRA_REUSE_WHEEL_SHA256:-}" ]]; then
 export CARGO_HOME="$ROOT/cargo" RUSTUP_HOME="$ROOT/rustup"
 export PATH="$CARGO_HOME/bin:$PATH"
 if ! command -v cargo >/dev/null; then
@@ -103,6 +123,7 @@ export RUSTFLAGS='-C target-cpu=x86-64'
 export CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER="$CC"
 export SGLANG_BUILD_RUST_EXTS=all SETUPTOOLS_SCM_PRETEND_VERSION_FOR_SGLANG=0.5.19+g560edbdca18a
 "$UV" build --wheel "$ROOT/source/python" --python "$NOTEBOOK_PY" -o "$OUT/wheels"
+fi
 
 # Install the known working dependency base, then resolve only what the new
 # runtime actually needs. Freeze the delta, never ship unpinned online installs.
@@ -113,10 +134,15 @@ RUNTIME="$ROOT/runtime/bin/python"
 "$UV" pip install --python "$RUNTIME" --prerelease=allow --index-strategy unsafe-best-match \
   --extra-index-url https://docs.sglang.ai/whl/cu130/ \
   --constraint "$ROOT/source/docker/pennyroyal/constraints.txt" "$OUT"/wheels/sglang-*.whl
-"$UV" pip install --python "$RUNTIME" --no-deps --index-url https://flashinfer.ai/whl/cu130 \
+# The umbrella cache declares every architecture provider. Resolve these too:
+# --no-deps left five missing requirements and failed v1's dependency check.
+"$UV" pip install --python "$RUNTIME" --index-url https://flashinfer.ai/whl/cu130 \
   'flashinfer-jit-cache==0.7.0.post1+cu130' 'flashinfer-jit-cache-sm120f==0.7.0.post1+cu130'
 "$UV" pip install --python "$RUNTIME" --no-deps --index-url https://flashinfer.ai/whl \
   'flashinfer-cubin==0.7.0.post1'
+# Kaggle's inherited sitecustomize imports wrapt, which the base lock omits.
+# Include it in the frozen overlay rather than tolerating startup import errors.
+"$UV" pip install --python "$RUNTIME" 'wrapt==1.17.3'
 "$RUNTIME" -m pip check
 "$RUNTIME" "$ROOT/source/scripts/pennyroyal/flashinfer/install.py"
 "$RUNTIME" "$ROOT/source/scripts/pennyroyal/flashinfer/install.py" --check
@@ -148,6 +174,8 @@ provenance=dict(source_commit='560edbdca18aedae13f71ae20b3984efa4d22633',
                 base_dataset='dfranzen/pennyroyal-v253',
                 validation='CPU build, compiled SM120f module and fresh offline installation; GPU inference unverified',
                 int4_patch='Daniel Franzen INT4 scale-dtype compatibility fix, Apache-2.0')
+import os
+provenance['reused_native_wheel_sha256']=os.environ.get('HYDRA_REUSE_WHEEL_SHA256')
 (out/'provenance.json').write_text(json.dumps(provenance,indent=2)+'\n')
 PY
 "$RUNTIME" "$SOURCE_FILES/package_overlay.py" manifest "$OUT"

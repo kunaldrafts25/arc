@@ -104,6 +104,43 @@ Read-only status/output commands:
 
 ## Next decisions from evidence
 
+### Update: 25 October, approximately 16:31 UTC
+
+- Previous question turn produced new evidence: the live public benchmark had
+  two full wins and mean 27.24. This is unfinished public evaluation, not hidden
+  competition performance. A later snapshot reached 28.19; version 2 remains
+  officially RUNNING and must finish on its existing 17:18 UTC gameplay deadline.
+- CPU build version 1 is officially ERROR. Native wheel compilation succeeded,
+  but the subsequent dependency check found five missing FlashInfer architecture
+  providers. The retained final `v3-build.log` is authoritative. Missing wrapt in
+  inherited sitecustomize was also observed. Both are addressed in the repair.
+- Native-wheel ZIP integrity, exact version, native-extension presence and
+  SHA-256 were checked before private dataset upload; provenance is in
+  `reports/kaggle/pennyroyal-v3-build-v1/native-wheel.json`.
+- Repair version 1 is officially ERROR: failed-job output was not a valid Kaggle
+  kernel input. The uploader needs a native Windows absolute path on this host.
+  The private retained-wheel dataset subsequently became ready; repair version 2
+  accepted it but failed early wheel discovery. The dataset file listing proved
+  Kaggle stripped `+` from the wheel filename. Version 3 handles that sanitized
+  name, checks the original hash, then restores the correct wheel filename.
+  Current ref: `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/3`.
+  CPU only, no models or competition input. Observer session 5080. Final overlay
+  uploads must preserve filenames inside an archive rather than direct wheels.
+  Version-3 live evidence confirms retained-wheel hash verification and the
+  SM120f compiler probe passed. Official status is RUNNING as of 16:35 UTC;
+  no final offline-check result yet. GPU version 2 is also officially RUNNING;
+  latest observed unfinished public mean 30.21, still not a hidden score.
+- Prepared offline GPU integration requires a completed bundle's real manifest
+  hash and uses a distinct notebook ID. CPU artifact success, GPU inference,
+  throughput improvement, agent improvement and hidden score remain unproven.
+- Local checks: 50 tests passed; repaired Bash script syntax passed with Git Bash.
+  The GPU baseline notebook files were not regenerated or replaced.
+
+Next: observe the exact CPU repair and original GPU benchmark; inspect terminal
+artifacts. Require CPU offline success before a separate GPU runtime test. The
+runtime's native NVFP4 optimizations may not apply to the current INT4 model, so
+do not assume a compatibility overlay provides its advertised speed gains.
+
 1. Inspect terminal status, `serve.log`, `benchmark.json`, model transcripts and
    `hydra_model_summary.json`. Notebook completion alone is insufficient because
    the upstream benchmark can swallow solver errors; the derived run explicitly

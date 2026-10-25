@@ -34,4 +34,5 @@ reports/kaggle/*/movies/
 reports/kaggle/*/solver_analysis/
 reports/kaggle/*/prompts/
 reports/kaggle/*/pennyroyal-v3-overlay/
+reports/kaggle/pennyroyal-v3-build-v1/arc-hydra-pennyroyal-v3-build.log
 pytest-cache-files-*/

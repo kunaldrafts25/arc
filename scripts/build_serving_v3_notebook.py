@@ -1,19 +1,26 @@
 """Package the CPU-only online builder, separate from competition notebooks."""
 from hashlib import sha256
+import argparse
 import json
 from pathlib import Path
+import re
 
 ROOT=Path(__file__).resolve().parents[1]
 
 
-def build():
+def build(reuse_wheel_sha256=None):
+    if reuse_wheel_sha256 is not None and not re.fullmatch('[0-9a-f]{64}',reuse_wheel_sha256):
+        raise ValueError('A real lowercase SHA-256 of the retained wheel is required')
     source_dir=ROOT/'scripts/serving_v3'
     sources={p.name:p.read_text(encoding='utf-8') for p in sorted(source_dir.iterdir()) if p.is_file()}
     sources['LICENSE.Franzen']=(ROOT/'baselines/duck_m2/LICENSE').read_text(encoding='utf-8')
     source="""from pathlib import Path
 import subprocess
 import sys
+import os
 """
+    if reuse_wheel_sha256:
+        source+=f"os.environ['HYDRA_REUSE_WHEEL_SHA256']={reuse_wheel_sha256!r}\n"
     source+='BUILD_SOURCES = '+repr(sources)+'\n'
     source+='''stage=Path('/kaggle/working/build-src')
 stage.mkdir(parents=True,exist_ok=True)
@@ -37,12 +44,20 @@ subprocess.run(['bash',str(stage/'build_overlay.sh'),str(stage)],check=True)
                   enable_gpu=False,enable_tpu=False,enable_internet=True,
                   dataset_sources=['dfranzen/pennyroyal-v253'],model_sources=[],kernel_sources=[],competition_sources=[],
                   docker_image=base['docker_image'])
+    if reuse_wheel_sha256:
+        metadata['id']='kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair'
+        metadata['title']='ARC Hydra Pennyroyal v3 Dependency Repair'
+        metadata['dataset_sources'].append('kunalsinghh25/arc-hydra-retained-v3-native-wheel')
     return notebook,metadata,sources
 
 
 if __name__=='__main__':
-    notebook,metadata,sources=build()
-    destination=ROOT/'notebooks/serving_v3_build';destination.mkdir(parents=True,exist_ok=True)
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--reuse-wheel-sha256')
+    args=parser.parse_args()
+    notebook,metadata,sources=build(args.reuse_wheel_sha256)
+    destination=ROOT/'notebooks'/('serving_v3_repair' if args.reuse_wheel_sha256 else 'serving_v3_build')
+    destination.mkdir(parents=True,exist_ok=True)
     for name,data in [('build.ipynb',notebook),('kernel-metadata.json',metadata),
                       ('source-manifest.json',{name:sha256(content.encode()).hexdigest() for name,content in sources.items()})]:
         (destination/name).write_text(json.dumps(data,indent=2)+'\n',encoding='utf-8')

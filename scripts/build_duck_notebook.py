@@ -8,6 +8,7 @@ from copy import deepcopy
 from hashlib import sha256
 import json
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'baselines/duck_m2/upstream.ipynb'
@@ -15,11 +16,18 @@ SOURCE_META = SOURCE.with_name('upstream-metadata.json')
 PREFIXES = ('ft09', 'ls20', 'r11l', 'vc33', 'bp35')
 
 
-def build(mode='preflight', contest_reserve_seconds=None):
+def build(mode='preflight', contest_reserve_seconds=None, runtime_overlay_dataset=None, runtime_overlay_sha256=None):
     if mode not in ('preflight', 'benchmark'):
         raise ValueError(mode)
     if contest_reserve_seconds is not None and not 120 <= contest_reserve_seconds < 32400:
         raise ValueError('Contest finalization reserve must be between 120 and 32399 seconds')
+    if runtime_overlay_dataset is not None:
+        if not re.fullmatch(r'[A-Za-z0-9_-]+/[A-Za-z0-9_-]+',runtime_overlay_dataset):
+            raise ValueError('Runtime overlay needs an owner/dataset reference')
+        if runtime_overlay_sha256 is None or not re.fullmatch(r'[a-f0-9]{64}',runtime_overlay_sha256):
+            raise ValueError('Runtime overlay requires the actual manifest SHA-256')
+    elif runtime_overlay_sha256 is not None:
+        raise ValueError('Manifest SHA requires a runtime overlay dataset')
     upstream = json.loads(SOURCE.read_text(encoding='utf-8'))
     notebook = deepcopy(upstream)
     code_digests = []
@@ -45,6 +53,32 @@ def build(mode='preflight', contest_reserve_seconds=None):
     if contest_reserve_seconds is not None:
         provenance['competition_finalization_reserve_seconds'] = contest_reserve_seconds
         provenance['competition_changes'] = 'Global notebook deadline with finalization reserve; agent/model/prompts/tools/serving/scheduling settings unchanged'
+    if runtime_overlay_dataset is not None:
+        provenance.update(runtime_overlay_dataset=runtime_overlay_dataset,
+                          runtime_overlay_manifest_sha256=runtime_overlay_sha256,
+                          runtime_source_commit='560edbdca18aedae13f71ae20b3984efa4d22633')
+        provenance['competition_changes'] = 'v3 serving overlay; original checkpoints, prompts, tools and agent settings retained'
+        if contest_reserve_seconds is not None:
+            provenance['competition_changes'] += f'; {contest_reserve_seconds}-second notebook finalization reserve'
+        serving=next(c for c in notebook['cells'] if c['source'].startswith('# Paste this entire file into the launcher cell.'))
+        anchor='# Report the optional later caching patch. This cell does not modify wheel code.'
+        assert serving['source'].count(anchor)==1
+        installer=(ROOT/'scripts/serving_v3/install_overlay.py').read_text(encoding='utf-8')
+        hook='\n# ARC-Hydra: verified, offline serving overlay in a separate candidate.\n'
+        hook+=f'HYDRA_OVERLAY_DATASET = {runtime_overlay_dataset!r}\n'
+        hook+='hydra_overlay_options = [Path("/kaggle/input/datasets") / HYDRA_OVERLAY_DATASET, Path("/kaggle/input") / HYDRA_OVERLAY_DATASET.split("/")[1]]\n'
+        hook+='hydra_overlay = next((p for p in hydra_overlay_options if (p / "manifest.json").is_file()), None)\n'
+        hook+='if hydra_overlay is None:\n    raise RuntimeError("Runtime overlay dataset not mounted")\n'
+        hook+=f'if sha256(hydra_overlay / "manifest.json") != {runtime_overlay_sha256!r}:\n    raise RuntimeError("Runtime overlay manifest differs from tested build")\n'
+        hook+='hydra_installer = Path(PREFIX) / "install_v3_overlay.py"\n'
+        hook+=f'hydra_installer.write_text({installer!r})\n'
+        hook+='hydra_runtime_env = Path(PREFIX) / "v3_environment.json"\n'
+        hook+='run([sys.executable, hydra_installer, "--overlay", hydra_overlay, "--base", WHEELHOUSE_DIR, "--venv", VENV, "--uv", Path(PREFIX) / "bin/uv", "--environment-output", hydra_runtime_env, "--port", SERVED_MODEL_PORT], env=env)\n'
+        hook+='env.update(json.loads(hydra_runtime_env.read_text()))\n'
+        hook+='CUDA_HOME, CC, CXX = env["CUDA_HOME"], env["CC"], env["CXX"]\n'
+        hook+='run([env["CUDACXX"], "--version"], env=env)\n'
+        hook+='print("Overlay host compiler:", env["CXX"])\n\n'
+        serving['source']=serving['source'].replace(anchor,hook+anchor)
     controls = next(c for c in notebook['cells'] if c['source'].startswith('# Make one-off changes'))
     controls['source'] += '\n\n# ARC-Hydra: bound public evaluation only; retain contest settings.\n'
     controls['source'] += 'if not TRUE_SUBMISSION:\n    bm.n_passes = 1\n'
@@ -89,12 +123,16 @@ if not TRUE_SUBMISSION:
     if not hydra_summary or any(r['state'] in ('crashed', 'not_started') or r['actions'] <= 0 for r in hydra_summary):
         raise RuntimeError('Model gameplay preflight failed; inspect benchmark.json and serve.log')
 '''
+    configuration_note=('Published serving configuration retained. ' if runtime_overlay_dataset is None else
+                        'Experimental v3 serving overlay; GPU correctness and performance unverified. ')
+    configuration_note+=('Original competition time controls retained.' if contest_reserve_seconds is None else
+                         f'Contest deadline includes startup and reserves {contest_reserve_seconds} seconds for finalization.')
     notebook['cells'].insert(0, dict(cell_type='markdown', metadata={}, source=(
         '# ARC-Hydra: attributed Duck M2 reproduction\n\n'
         'Original agent and serving code: **Daniel Franzen**, building on '
         '**Jeroen Cottaar and Tufa Labs**. Apache-2.0; model/runtime terms apply.\n\n'
-        'This private notebook measures the published baseline before further changes. '
-        f'Public mode: {mode}. Original competition settings are retained. '
+        'This private notebook measures the attributed agent or a declared runtime experiment. '
+        f'Public mode: {mode}. {configuration_note} '
         'No score reproduction or score above 71 is claimed.\n\n'
         '[Original notebook](https://www.kaggle.com/code/dfranzen/arc-agi-3-milestone-2-solution) · '
         '[Author source](https://github.com/da-fr/arc-agi-3-solution)\n')))
@@ -104,17 +142,24 @@ if not TRUE_SUBMISSION:
     metadata.update(id='kunalsinghh25/arc-hydra-duck-m2-baseline',
                     title='ARC Hydra Duck M2 Baseline', code_file='submission.ipynb',
                     is_private=True, enable_internet=False, machine_shape='NvidiaRtxPro6000')
+    if runtime_overlay_dataset is not None:
+        metadata['dataset_sources'].append(runtime_overlay_dataset)
+        metadata['id']='kunalsinghh25/arc-hydra-duck-v3-runtime'
+        metadata['title']='ARC Hydra Duck V3 Runtime'
     return notebook, metadata, provenance
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--mode', choices=('preflight','benchmark'), default='preflight')
-    parser.add_argument('--output', default='notebooks/duck_m2')
+    parser.add_argument('--output')
     parser.add_argument('--contest-reserve-seconds',type=int)
+    parser.add_argument('--runtime-overlay-dataset')
+    parser.add_argument('--runtime-overlay-sha256')
     args = parser.parse_args()
-    notebook, metadata, provenance = build(args.mode,args.contest_reserve_seconds)
-    destination = (ROOT/args.output).resolve()
+    notebook, metadata, provenance = build(args.mode,args.contest_reserve_seconds,args.runtime_overlay_dataset,args.runtime_overlay_sha256)
+    output=args.output or ('notebooks/duck_v3_runtime' if args.runtime_overlay_dataset else 'notebooks/duck_m2')
+    destination = (ROOT/output).resolve()
     if not destination.is_relative_to(ROOT):
         raise ValueError('Notebook output must stay inside the workspace')
     destination.mkdir(parents=True,exist_ok=True)

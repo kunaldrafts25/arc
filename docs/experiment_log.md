@@ -216,3 +216,25 @@ An early persistence run started while the game cache was still populating, was 
 - Local checks now total 48 passes; CPU build syntax and embedded source also
   validated. Accelerator quota snapshot shows 4.1103 of 30 GPU hours used and
   pay-to-scale disabled. No quota or billing setting was changed.
+## 2026-10-25: runtime dependency repair and prepared GPU integration
+
+CPU build `arc-hydra-pennyroyal-v3-build/1` failed after successfully building the
+native SGLang wheel. The final log identifies missing architecture requirements
+of the cache umbrella at `pip check`; sitecustomize also lacked wrapt. Resolve
+the umbrella dependencies, pin wrapt, and retain all fresh offline checks.
+Hash-verified native wheel reuse avoids repeating Rust compilation. Private
+dataset `kunalsinghh25/arc-hydra-retained-v3-native-wheel` is ready. Repair v1
+failed because Kaggle rejected the failed build's kernel input. Repair v2 uses
+that dataset but failed early because Kaggle stripped `+` from its wheel name.
+The official dataset file listing verified that transformation. Version 3 handles
+the sanitized name, verifies its content hash and restores the wheel filename;
+it is the current CPU-only experiment, with a 14,400-second cap.
+Its live log confirms wheel hash verification and the SM120f compiler probe
+passed; official version-3 status is RUNNING at 16:35 UTC. Latest unfinished
+GPU baseline public mean observed: 30.21. Both jobs remain live.
+
+Prepared `install_overlay.py` plus separate offline notebook hooks require a
+verified completed artifact and its manifest SHA. Not yet GPU tested or uploaded.
+50 local tests and Bash syntax checks passed. The running baseline is unchanged;
+latest unfinished public snapshot mean 28.19, two full wins. No new official
+competition score and no evidence yet of a score above 71.48.

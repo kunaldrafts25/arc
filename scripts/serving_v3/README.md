@@ -42,6 +42,34 @@ The next stage, if the build succeeds, is to prepare an offline overlay installe
 for a separate GPU candidate, verify model loading/inference, and run a matched
 agent comparison. The current baseline must finish before being replaced.
 
-Job `kunalsinghh25/arc-hydra-pennyroyal-v3-build/1` is running. Its live log has
-confirmed the compiler probe passed and native Rust compilation began. Final
-build and offline-install results are still unknown.
+Job `kunalsinghh25/arc-hydra-pennyroyal-v3-build/1` ended ERROR after a successful
+native wheel build. `pip check` found five architecture-provider requirements
+missing from the FlashInfer cache umbrella installed with `--no-deps`.
+Kaggle's inherited sitecustomize also reported missing wrapt. The repair resolves
+the complete cache family and freezes wrapt into the runtime delta.
+
+The native wheel was downloaded, checked for ZIP integrity, version and native
+extensions, and SHA-256 verified:
+`ffc0be8aa61168db6a521bb9eaae800e3cfde64d888170cc66fa9cde9dfa94a6`.
+It is retained in our private dataset
+`kunalsinghh25/arc-hydra-retained-v3-native-wheel`. This saves recompiling Rust;
+the compiler probe, FlashInfer build and fresh offline checks still run.
+
+```powershell
+.venv/Scripts/python.exe scripts/build_serving_v3_notebook.py --reuse-wheel-sha256 ffc0be8aa61168db6a521bb9eaae800e3cfde64d888170cc66fa9cde9dfa94a6
+.venv/Scripts/python.exe scripts/kaggle_local.py kernels push -p notebooks/serving_v3_repair --timeout 14400
+```
+
+The first repair version failed because Kaggle rejected the failed job as a
+kernel input. Version 2 used the ready private dataset but failed its early input
+check: Kaggle stripped `+` from the wheel filename. The dataset file listing
+confirmed this. Version 3 accepts that sanitized filename, verifies the original
+content hash and restores the valid wheel name before installation.
+Exact live ref: `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/3`.
+Observer session 5080 writes `reports/kaggle/pennyroyal-v3-repair-v3/live.log`.
+Preserve original wheel paths in an archive when packaging the final overlay;
+direct wheel uploads can alter filenames while leaving their contents unchanged.
+
+`install_overlay.py` and the optional runtime-overlay arguments of
+`build_duck_notebook.py` prepare a separate offline GPU candidate. They require
+the actual completed bundle manifest hash; no v3 GPU candidate has been launched.
