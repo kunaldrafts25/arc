@@ -316,3 +316,11 @@ Inspected the existing sandbox/perception API before adding tools: connected
 components, color/shape/rotation hashes, adjacency and movement are already
 available. A duplicate component detector is not justified. Retain failure-trace
 analysis as the basis for any additional perception intervention.
+
+Operational follow-up: installed Kaggle CLI source confirmed that five quiet
+stream failures end the observer without establishing cloud completion. Added
+`scripts/kaggle_watch.py`, a read-only exact-version observer with longer retry
+tolerance and an authoritative status read when it exits. Syntax and help
+checks passed. CPU v5 was re-polled RUNNING and observer session 17923 attached;
+`watcher.log` is now preferred. Both GPU versions and the CPU cloud job remain
+unchanged. No performance improvement or final build result is claimed.

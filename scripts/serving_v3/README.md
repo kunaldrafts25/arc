@@ -81,6 +81,15 @@ observer 39736 now follows it. V5 live evidence confirms dependency checks and
 the cuBLAS/NVRTC/CCCL SM120f compilation probe passed. Full native compilation
 and fresh offline verification are still pending; see `header-probe.json` in
 the version-5 report directory.
+The current CPU observer is session 17923 using `scripts/kaggle_watch.py`; its
+preferred output is `reports/kaggle/pennyroyal-v3-repair-v5/watcher.log`. This
+read-only helper extends the SDK's five-failure reconnect allowance for quiet
+compilation, deduplicates replayed events through the SDK, and reports cloud
+status when observation ends. It never restarts the job.
+
+```powershell
+.venv/Scripts/python.exe scripts/kaggle_watch.py kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/5 --output reports/kaggle/pennyroyal-v3-repair-v5/watcher.log
+```
 Preserve original wheel paths in an archive when packaging the final overlay;
 direct wheel uploads can alter filenames while leaving their contents unchanged.
 

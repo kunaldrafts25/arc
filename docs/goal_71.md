@@ -14,11 +14,11 @@ jobs live. This continuation found and launched a separate model experiment.
 | Exact job | Last official status | Observer session |
 |---|---|---|
 | `kunalsinghh25/arc-hydra-duck-summary/1` | RUNNING, health passed; public gameplay deadline 20:34:08 UTC | 98131 |
-| `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/5` | RUNNING, library-header probe passed; native build pending | 39736 |
+| `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/5` | RUNNING, library-header probe passed; native build pending | 17923 |
 | `kunalsinghh25/arc-hydra-duck-swift/1` | RUNNING, health passed; public gameplay deadline 20:32:58 UTC | 11072 |
 
 Logs are `reports/kaggle/duck-summary-v1/live.log`,
-`reports/kaggle/pennyroyal-v3-repair-v5/live.log`, and
+`reports/kaggle/pennyroyal-v3-repair-v5/watcher.log`, and
 `reports/kaggle/duck-swift-v1/live.log`. CPU log reconnect errors are observation
 failures; authoritative status confirms the job is still running. Never restart
 one of these versions just because startup or compilation takes time.
@@ -56,6 +56,14 @@ new cuBLAS/NVRTC/CCCL SM120f header-compilation probe. Structured stage evidence
 is `reports/kaggle/pennyroyal-v3-repair-v5/header-probe.json`. This gets past the
 two observed missing-header failures but does not prove native module completion,
 fresh offline installation or GPU performance.
+
+The CPU observer now uses `scripts/kaggle_watch.py`, session 17923, writing
+`watcher.log` in UTF-16. Installed CLI source confirmed its default five quiet
+reconnect failures caused repeated observer exits. The helper uses the same
+deduplicating SDK stream with a longer retry allowance and reports authoritative
+cloud status if it returns. It requires an exact version and never saves,
+pushes, cancels or submits anything. The old observer may finish independently;
+prefer `watcher.log` for subsequent CPU observations. Syntax/help checks passed.
 
 Independent tool-API inspection found that component segmentation, rotation
 hashes, adjacency and cross-frame movement already exist in the published
