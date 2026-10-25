@@ -37,6 +37,7 @@ def build(mode='preflight'):
         license='Apache-2.0; third-party model/runtime licenses also apply',
         mode=mode, public_games=list(PREFIXES) if mode=='preflight' else 'all 25',
         public_runtime_seconds=900 if mode=='preflight' else 7200,
+        public_startup_allowance_seconds=3600,
         competition_changes='None to model, prompts, tools, serving or scheduling',
     )
     controls = next(c for c in notebook['cells'] if c['source'].startswith('# Make one-off changes'))
@@ -48,12 +49,16 @@ def build(mode='preflight'):
     needle = 'await bm.run(soft_end_time=soft_end, runtime_environment=target, minimal_diagnostics=TRUE_SUBMISSION)'
     assert run['source'].count(needle) == 1
     evaluation = '\n# ARC-Hydra public reproduction; no hidden game selection.\nif not TRUE_SUBMISSION:\n'
+    wait_source = (ROOT/'scripts/wait_local_backend.py').read_text(encoding='utf-8')
+    evaluation += f'    exec({wait_source!r})\n'
+    evaluation += '    wait_local_backend(f"http://127.0.0.1:{SERVED_MODEL_PORT}/health", NOTEBOOK_START_TIME + 3600, proc)\n'
     if mode == 'preflight':
         evaluation += f'    hydra_prefixes = {PREFIXES!r}\n'
         evaluation += '    bm.games = [g for g in bm.games if g.env_name.split("-")[0] in hydra_prefixes]\n'
         evaluation += '    if len(bm.games) != len(hydra_prefixes):\n        raise RuntimeError("Public preflight games missing")\n'
     evaluation += '    bm.solver.concurrency = len(bm.games)\n'
     evaluation += f'    soft_end = datetime.now() + timedelta(seconds={provenance["public_runtime_seconds"]})\n'
+    evaluation += '    print("Hydra effective public run:", dict(games=len(bm.games), passes=bm.n_passes, concurrency=bm.solver.concurrency, gameplay_seconds=bm.solver.max_runtime_s_per_game, deadline=soft_end.isoformat()))\n'
     evaluation += f'    Path(WORKING_DIR / "hydra_provenance.json").write_text(json.dumps({provenance!r}, indent=2))\n'
     run['source'] = run['source'].replace(needle, evaluation+'\n'+needle)
     # Benchmark.run deliberately swallows some solver errors. A completed
@@ -94,9 +99,12 @@ if not TRUE_SUBMISSION:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--mode', choices=('preflight','benchmark'), default='preflight')
+    parser.add_argument('--output', default='notebooks/duck_m2')
     args = parser.parse_args()
     notebook, metadata, provenance = build(args.mode)
-    destination = ROOT/'notebooks/duck_m2'
+    destination = (ROOT/args.output).resolve()
+    if not destination.is_relative_to(ROOT):
+        raise ValueError('Notebook output must stay inside the workspace')
     destination.mkdir(parents=True,exist_ok=True)
     for name, value in (('submission.ipynb',notebook),('kernel-metadata.json',metadata),('provenance.json',provenance)):
         (destination/name).write_text(json.dumps(value,indent=2)+'\n',encoding='utf-8')

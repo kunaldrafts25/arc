@@ -30,6 +30,14 @@ evaluation settings and result verification are changed. Generated metadata
 retains all original offline inputs and the pinned container image, selects RTX
 PRO 6000, uses our private notebook ID and disables internet.
 
+The next prepared revision waits for model readiness before starting the public
+gameplay clock. It allows up to one hour from notebook initialization for model
+startup, checks the server process and health, and fails explicitly if startup
+cannot finish. This is public-only; competition startup behavior is unchanged.
+Allow a 5,400-second notebook timeout for the preflight, or 12,000 seconds for
+the two-hour public benchmark. Do not replace a running notebook version merely
+because its model is still loading; inspect its terminal logs first.
+
 The author's write-up reports a 27.89 leaderboard score. Our reproduction is
 currently unscored. Do not treat local tests, an upload or a running job as proof
 of model startup, game completion or score reproduction.

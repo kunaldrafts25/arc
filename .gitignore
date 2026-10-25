@@ -23,4 +23,6 @@ reference/
 .tmp/
 .pytest_cache/
 test-artifacts/
+# Transient live stream; final downloaded run logs remain tracked evidence.
+reports/kaggle/*/live.log
 pytest-cache-files-*/

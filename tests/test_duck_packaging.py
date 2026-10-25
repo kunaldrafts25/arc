@@ -59,3 +59,13 @@ def test_warmup_reset_cannot_be_misreported_as_model_gameplay():
     assert result['model_gameplay_verified']
     assert result['mean_public_score']==1.2
     assert result['full_wins']==0
+
+
+def test_public_model_wait_never_runs_in_a_competition_rerun():
+    notebook, _, _ = build()
+    source=next(c['source'] for c in notebook['cells'] if c['source'].startswith("print('Starting benchmark...')"))
+    evaluation=source.split('# ARC-Hydra public reproduction; no hidden game selection.\n',1)[1]
+    evaluation=evaluation.split('await bm.run(',1)[0]
+    # No public model-health call, game filter or deadline replacement is
+    # allowed on the competition path. Missing variables deliberately catch it.
+    exec(compile(evaluation,'public-readiness-gate','exec'),dict(TRUE_SUBMISSION=True))
