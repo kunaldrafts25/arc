@@ -2,6 +2,11 @@
 
 ## Version 3 — 25 October 2026
 
+Official result: submission **57630597 COMPLETE**, public score **0.02**, no
+evaluation error. The aggregate improvement over v0.1's 0.01 is small; public
+FT09 mastery did not establish generalization. Development now continues with a
+separate model-agent reproduction; see `docs/goal_71.md`.
+
 Private notebook COMPLETE. The v0.2 reasoning candidate completed all six FT09
 levels in 159 actions, ending in official WIN, with no exceptions in the actual
 offline Kaggle runtime. LS20 and VC33 each executed 20 smoke actions without

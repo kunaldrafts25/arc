@@ -1,0 +1,42 @@
+# Attributed public Duck M2 baseline
+
+Original notebook downloaded through the official Kaggle API:
+https://www.kaggle.com/code/dfranzen/arc-agi-3-milestone-2-solution
+
+SHA-256: `88a379f17c3a4ba8c98715fc23155346ccd6eb289bdafebadfc61a3178f9d9bd`.
+Original metadata is preserved in `upstream-metadata.json`.
+
+Author: **Daniel Franzen**, building on **Jeroen Cottaar and Tufa Labs' Duck
+harness**. The author repository is https://github.com/da-fr/arc-agi-3-solution,
+inspected at commit `10882e332d883af3e61616df8c8a17d03a328a75`.
+Its Apache-2.0 license is retained in `LICENSE`. This repository does not claim
+authorship of the agent, serving code, prompts or harness patch.
+
+The notebook mounts two public datasets, Intel's Qwen3.8-Flash-Next W4A16
+AutoRound checkpoint, and Albucino's draft checkpoint. Weights and runtimes are
+not copied into this repository. Model licenses are distinct from the harness
+license; the Intel and original Qwen model cards identify Qwen Community 1.0.
+Keep their notices/terms when redistributing any model-derived artifact.
+
+Build the private evaluation notebook:
+
+```powershell
+.venv/Scripts/python.exe scripts/build_duck_notebook.py --mode preflight
+```
+
+Use `--mode benchmark` for all public games and a two-hour gameplay budget.
+Both modes preserve the original full competition configuration. Only public
+evaluation settings and result verification are changed. Generated metadata
+retains all original offline inputs and the pinned container image, selects RTX
+PRO 6000, uses our private notebook ID and disables internet.
+
+The author's write-up reports a 27.89 leaderboard score. Our reproduction is
+currently unscored. Do not treat local tests, an upload or a running job as proof
+of model startup, game completion or score reproduction.
+
+References:
+
+- https://github.com/da-fr/arc-agi-3-solution/blob/main/WRITEUP.md
+- https://github.com/Tufalabs/duck-harness
+- https://huggingface.co/Intel/Qwen3.8-Flash-Next-W4A16-AutoRound
+- https://huggingface.co/Qwen/Qwen3.8-Flash-Next

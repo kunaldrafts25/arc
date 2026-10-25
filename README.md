@@ -7,7 +7,9 @@ notebook builder. Public local measurements and target validation status are in
 motion and tile mechanics, visual goal inference and verified linear plans.
 It completes the public FT09 game in local tests and Kaggle's offline runtime;
 see [v0.2 development evidence](docs/v02_development.md). Hidden performance
-remains unmeasured for v0.2; the previous submission scored 0.01.
+was **0.02** for v0.2 (submission 57630597), versus 0.01 for v0.1. The
+public-game improvement barely transferred. The active objective and model-agent
+reproduction are recorded in [the 71-point goal](docs/goal_71.md).
 
 PowerShell, from this directory:
 
