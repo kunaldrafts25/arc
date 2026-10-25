@@ -1,4 +1,18 @@
-# ARC-Hydra v0.1 technical report
+# ARC-Hydra technical report
+
+## v0.2 — 25 October 2026
+
+The current candidate uses learned motion, click effects, color cycles, visual
+glyph programs and verified linear plans, with a 300-action guard. All 38 local
+tests pass. Private Kaggle notebook version 3 reproduced a complete six-level
+FT09 win in 159 actions, plus two short public smoke checks without exceptions.
+See [the v0.2 evidence and limitations](v02_development.md) for experiments and
+the broad comparison. These public wins do not establish hidden performance.
+
+The historical v0.1 report follows; its default and measurements describe the
+previous agent rather than the current candidate.
+
+## v0.1 historical report
 
 Built on 2026-10-24 in D:/compi/ARC-AGI-3-Kaggle-Starter, branch feature/arc-hydra. This is an operational local baseline. Kaggle version 2 completed actual public-game smoke validation and was accepted as competition submission 57601062. Its hidden evaluation status is tracked in docs/kaggle_validation.md and reports/kaggle/submission-status.json.
 

@@ -16,13 +16,13 @@ for relative in paths:
 manifest = {
     "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
     "sha256": {p: sha256((ROOT/p).read_bytes()).hexdigest() for p in paths},
-    "validation_boundary": "Local public engine and source packaging verified; Kaggle execution unverified",
+    "validation_boundary": "Local public gameplay and Kaggle v3 offline public smoke verified; v0.2 hidden score pending",
 }
-destination = ROOT.parent / "arc-hydra-v0.1.zip"
+destination = ROOT.parent / "arc-hydra-v0.2.zip"
 with ZipFile(destination, "w", compression=ZIP_DEFLATED, compresslevel=9) as archive:
     for relative in paths:
-        archive.write(ROOT/relative, "arc-hydra-v0.1/"+relative)
-    archive.writestr("arc-hydra-v0.1/RELEASE_MANIFEST.json", json.dumps(manifest, indent=2)+"\n")
+        archive.write(ROOT/relative, "arc-hydra-v0.2/"+relative)
+    archive.writestr("arc-hydra-v0.2/RELEASE_MANIFEST.json", json.dumps(manifest, indent=2)+"\n")
 with ZipFile(destination) as archive:
     assert archive.testzip() is None
 print(f"Created {destination} ({destination.stat().st_size:,} bytes); ZIP integrity verified")
