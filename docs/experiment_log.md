@@ -268,3 +268,21 @@ Corrected diagnostic classification of `TerminalStateActionError`: an expected
 terminal-state guard stop, not an ordinary Python error. Regenerated six-game
 audit now has 23 ordinary errors, seven stale-state stops and one terminal-state
 stop; two targeted tests pass. Raw traces and final scores are unchanged.
+
+## 2026-10-25: reasoning-efficient Swift model comparison
+
+Public primary-source research found UkisAI Swift 1.5 and a compatible AutoRound
+INT4 Kaggle mirror (`phuongncn/arc3-qwen38-swift-w4a16-autoround`). The author
+reports shorter reasoning on other benchmarks, not ARC. Metadata-only queries
+verified both version-1 model parts, inventory, quantization settings and matching
+FR-Spec tokenizer hash. No tensors were downloaded locally. An automatic review
+initially rejected a model-card command as a possible huge download; installed
+source inspection proved it only fetches JSON metadata and the retry succeeded.
+
+Prepared and launched `kunalsinghh25/arc-hydra-duck-swift/1`: original agent,
+runtime, draft, tools and scheduler; all 25 public games, one pass, two-hour
+gameplay after readiness. Independent of rolling-summary and runtime changes.
+Live input checks passed for 95 files/82 indexed shards; mounted config SHA
+matches inspected upstream. Offline runtime installation started. GPU loading,
+inference and performance remain unverified. Summary v1 and CPU repair v4 were
+also re-polled RUNNING. 53 local tests pass. See `baselines/swift_15/README.md`.

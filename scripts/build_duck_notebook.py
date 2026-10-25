@@ -16,11 +16,15 @@ SOURCE_META = SOURCE.with_name('upstream-metadata.json')
 PREFIXES = ('ft09', 'ls20', 'r11l', 'vc33', 'bp35')
 
 
-def build(mode='preflight', contest_reserve_seconds=None, runtime_overlay_dataset=None, runtime_overlay_sha256=None, agent_variant='baseline'):
+def build(mode='preflight', contest_reserve_seconds=None, runtime_overlay_dataset=None, runtime_overlay_sha256=None, agent_variant='baseline', model_variant='intel'):
     if mode not in ('preflight', 'benchmark'):
         raise ValueError(mode)
     if agent_variant not in ('baseline','rolling-summary'):
         raise ValueError(agent_variant)
+    if model_variant not in ('intel','swift-1.5'):
+        raise ValueError(model_variant)
+    if model_variant!='intel' and (agent_variant!='baseline' or runtime_overlay_dataset is not None):
+        raise ValueError('Evaluate the model change separately from memory/runtime first')
     if agent_variant!='baseline' and runtime_overlay_dataset is not None:
         raise ValueError('Evaluate memory and runtime changes separately first')
     if contest_reserve_seconds is not None and not 120 <= contest_reserve_seconds < 32400:
@@ -57,6 +61,26 @@ def build(mode='preflight', contest_reserve_seconds=None, runtime_overlay_datase
     if contest_reserve_seconds is not None:
         provenance['competition_finalization_reserve_seconds'] = contest_reserve_seconds
         provenance['competition_changes'] = 'Global notebook deadline with finalization reserve; agent/model/prompts/tools/serving/scheduling settings unchanged'
+    if model_variant=='swift-1.5':
+        manifest=json.loads((ROOT/'baselines/swift_15/model.json').read_text())
+        helper=(ROOT/'scripts/swift_model_view.py').read_text()
+        configuration=next(c for c in notebook['cells'] if '\nos.environ.update({k: str(v) for k,v in setup_env.items()})' in c['source'])
+        configuration['source']+='\n# ARC-Hydra Swift split-checkpoint view.\n'
+        configuration['source']+=f'hydra_swift_manifest = {manifest!r}\n'
+        configuration['source']+=f'hydra_swift_module = {{}}\nexec({helper!r}, hydra_swift_module)\n'
+        configuration['source']+='''hydra_swift_parts = {}
+for hydra_part in ('a','b'):
+    hydra_suffix = f'phuongncn/arc3-qwen38-swift-w4a16-autoround/pytorch/w4a16-{hydra_part}/1'
+    hydra_candidates = [Path('/kaggle/input/models') / hydra_suffix, Path('/kaggle/input') / hydra_suffix]
+    hydra_swift_parts[hydra_part] = next((p for p in hydra_candidates if p.is_dir()), None)
+    if hydra_swift_parts[hydra_part] is None:
+        raise RuntimeError(f'Swift checkpoint part {hydra_part} is not mounted')
+MODEL_DIR = hydra_swift_module['prepare'](hydra_swift_parts, '/tmp/hydra-swift-model', hydra_swift_manifest)
+'''
+        provenance.update(model_variant=model_variant,model_manifest=manifest)
+        provenance['competition_changes']='Swift 1.5 AutoRound target; original runtime, draft, agent, prompts, tools and scheduler retained'
+        if contest_reserve_seconds is not None:
+            provenance['competition_changes']+=f'; {contest_reserve_seconds}-second finalization reserve'
     if agent_variant=='rolling-summary':
         overrides=dict(ARC3_SUMMARY_INTERVAL_TOKENS=48*1024,ARC3_SUMMARY_MAX_GEN=4096,
                        ARC3_SUMMARY_TURN_CONTEXT='1',ARC3_DRAIN_STOP_AT_SUMMARIES='1')
@@ -145,6 +169,8 @@ if not TRUE_SUBMISSION:
                          f'Contest deadline includes startup and reserves {contest_reserve_seconds} seconds for finalization.')
     if agent_variant=='rolling-summary':
         configuration_note+=' Experimental periodic summaries with summary-aware history draining; benefit unproven.'
+    if model_variant=='swift-1.5':
+        configuration_note+=' Swift 1.5 target-model experiment; model/gameplay compatibility and benefit unverified.'
     notebook['cells'].insert(0, dict(cell_type='markdown', metadata={}, source=(
         '# ARC-Hydra: attributed Duck M2 reproduction\n\n'
         'Original agent and serving code: **Daniel Franzen**, building on '
@@ -166,6 +192,9 @@ if not TRUE_SUBMISSION:
         metadata['title']='ARC Hydra Duck V3 Runtime'
     if agent_variant=='rolling-summary':
         metadata.update(id='kunalsinghh25/arc-hydra-duck-summary',title='ARC Hydra Duck Summary')
+    if model_variant=='swift-1.5':
+        metadata.update(id='kunalsinghh25/arc-hydra-duck-swift',title='ARC Hydra Duck Swift')
+        metadata['model_sources']=[m for m in metadata['model_sources'] if 'intel-qwen' not in m]+manifest['model_sources']
     return notebook, metadata, provenance
 
 
@@ -177,9 +206,11 @@ def main():
     parser.add_argument('--runtime-overlay-dataset')
     parser.add_argument('--runtime-overlay-sha256')
     parser.add_argument('--agent-variant',choices=('baseline','rolling-summary'),default='baseline')
+    parser.add_argument('--model-variant',choices=('intel','swift-1.5'),default='intel')
     args = parser.parse_args()
-    notebook, metadata, provenance = build(args.mode,args.contest_reserve_seconds,args.runtime_overlay_dataset,args.runtime_overlay_sha256,args.agent_variant)
-    output=args.output or ('notebooks/duck_summary' if args.agent_variant=='rolling-summary' else
+    notebook, metadata, provenance = build(args.mode,args.contest_reserve_seconds,args.runtime_overlay_dataset,args.runtime_overlay_sha256,args.agent_variant,args.model_variant)
+    output=args.output or ('notebooks/duck_swift' if args.model_variant=='swift-1.5' else
+                          'notebooks/duck_summary' if args.agent_variant=='rolling-summary' else
                           'notebooks/duck_v3_runtime' if args.runtime_overlay_dataset else 'notebooks/duck_m2')
     destination = (ROOT/output).resolve()
     if not destination.is_relative_to(ROOT):

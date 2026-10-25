@@ -6,6 +6,43 @@ reference, using eligible, reproducible offline code. Public development scores,
 accepted uploads and successful tests do not prove success. The goal remains
 active until official evidence meets it.
 
+## Latest checkpoint: 25 October, approximately 18:21 UTC
+
+Previous turn made progress by correcting audit classification and verified both
+jobs live. This continuation found and launched a separate model experiment.
+
+| Exact job | Last official status | Observer session |
+|---|---|---|
+| `kunalsinghh25/arc-hydra-duck-summary/1` | RUNNING, waiting for model readiness | 98131 |
+| `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/4` | RUNNING, native FlashInfer compilation stage | 72918 |
+| `kunalsinghh25/arc-hydra-duck-swift/1` | RUNNING, split input checks passed, offline runtime installation | 11072 |
+
+Logs are `reports/kaggle/duck-summary-v1/live.log`,
+`reports/kaggle/pennyroyal-v3-repair-v4/live.log`, and
+`reports/kaggle/duck-swift-v1/live.log`. CPU log reconnect errors are observation
+failures; authoritative status confirms the job is still running. Never restart
+one of these versions just because startup or compilation takes time.
+
+Swift 1.5 is a public reasoning-efficient derivative. An existing AutoRound INT4
+mirror permits a target-only experiment with the original runtime/draft rather
+than waiting for v3/NVFP4 integration. Same 25 games and 7,200-second gameplay
+budget as the completed baseline; separate from the memory experiment. All 95
+input files passed size checks, its 82-shard index is complete, and mounted
+config SHA matches inspected upstream. No tensor data downloaded to Windows.
+Research, pinned input inventory, notices and limitations: `baselines/swift_15`.
+Local checks: **53 passed**. All three exact statuses above were read directly.
+
+An auto-review rejection of a model-card read was resolved by inspecting the
+CLI implementation: `model_get_cli` writes JSON metadata only; actual checkpoint
+download is a separate method. The verified retry succeeded. No approval is
+pending and no weights were transferred locally.
+
+Completed baseline remains public **43.7621**, 102 levels/five wins. Official
+hidden score remains **0.02**, with zero submissions remaining on the latest
+official allowance read. Wait for live experiment results and the next allowance
+before choosing a validated hidden-score candidate. Neither Swift nor the
+summary/runtime experiments have established an improved score yet.
+
 ## Authoritative starting point
 
 - v0.1: submission 57601062, COMPLETE, public score 0.01.
@@ -17,7 +54,7 @@ active until official evidence meets it.
 - One daily submission was used on 25 October. Query the official allowance
   before entering another candidate; private notebook validation is separate.
 
-## Current experiment
+## Baseline experiment history (latest status is above)
 
 Reproduce Daniel Franzen's public Milestone 2 model-based baseline, credited to
 Franzen, Jeroen Cottaar and Tufa Labs. The author reports 27.89 for his submission;
