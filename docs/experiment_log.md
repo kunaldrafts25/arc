@@ -286,3 +286,22 @@ Live input checks passed for 95 files/82 indexed shards; mounted config SHA
 matches inspected upstream. Offline runtime installation started. GPU loading,
 inference and performance remain unverified. Summary v1 and CPU repair v4 were
 also re-polled RUNNING. 53 local tests pass. See `baselines/swift_15/README.md`.
+
+## 2026-10-26 IST: both GPU comparisons passed readiness
+
+Swift public readiness passed, configured deadline 25 October 20:32:58 UTC;
+summary passed shortly afterwards, deadline 20:34:08 UTC. Both retain the full
+7,200-second post-readiness gameplay budget. Structured readiness snapshots
+record these settings and distinguish health from substantive model gameplay.
+No final score, verified summary execution or hidden-score improvement yet.
+The CPU build remains separate. No notebook version was restarted or replaced.
+
+Subsequent live snapshots verify substantive model gameplay: Swift two levels,
+224 actions and 130,680 tokens; summary variant three levels, 142 actions and
+145,223 tokens. These unfinished snapshots are not synchronized and cannot rank
+the interventions. Actual summary requests still need verification.
+
+CPU v4 subsequently ended ERROR on missing `nvrtc.h`. The CUDA library filter
+was excluding NVRTC along with compiler packages. V5 narrows that exclusion and
+adds a cuBLAS/NVRTC/CCCL compile probe before native compilation. Launched only
+after authoritative v4 ERROR; Python/Bash syntax checked. GPU versions unchanged.

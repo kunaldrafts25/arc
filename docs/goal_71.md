@@ -13,12 +13,12 @@ jobs live. This continuation found and launched a separate model experiment.
 
 | Exact job | Last official status | Observer session |
 |---|---|---|
-| `kunalsinghh25/arc-hydra-duck-summary/1` | RUNNING, waiting for model readiness | 98131 |
-| `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/4` | RUNNING, native FlashInfer compilation stage | 12606 |
-| `kunalsinghh25/arc-hydra-duck-swift/1` | RUNNING, split input checks passed, offline runtime installation | 11072 |
+| `kunalsinghh25/arc-hydra-duck-summary/1` | RUNNING, health passed; public gameplay deadline 20:34:08 UTC | 98131 |
+| `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/5` | RUNNING, CPU NVRTC-header repair | 29593 |
+| `kunalsinghh25/arc-hydra-duck-swift/1` | RUNNING, health passed; public gameplay deadline 20:32:58 UTC | 11072 |
 
 Logs are `reports/kaggle/duck-summary-v1/live.log`,
-`reports/kaggle/pennyroyal-v3-repair-v4/live.log`, and
+`reports/kaggle/pennyroyal-v3-repair-v5/live.log`, and
 `reports/kaggle/duck-swift-v1/live.log`. CPU log reconnect errors are observation
 failures; authoritative status confirms the job is still running. Never restart
 one of these versions just because startup or compilation takes time.
@@ -26,6 +26,28 @@ At approximately 18:24 UTC the CPU observer exhausted its reconnect attempts.
 The exact cloud job was verified RUNNING and only the observer was reconnected
 (new session 12606). Summary and Swift startup logs continue advancing within
 their existing allowances; no new game result is available yet.
+
+At approximately 18:34 UTC (26 October 00:04 IST), both GPU public readiness
+checks passed. Their configured 7,200-second gameplay windows have begun.
+Deadlines: Swift 26 October **02:02:58 IST**, summary **02:04:08 IST**. Structured
+readiness evidence is in each run's `readiness.json`. Health and warmup resets
+alone do not establish generated tokens, substantive actions or summary execution.
+The earlier startup-only descriptions below are historical; retain both runs.
+
+At approximately 18:38 UTC, substantive gameplay is verified in live printed
+snapshots: Swift **two levels, 224 actions, 130,680 tokens**; summary variant
+**three levels, 142 actions, 145,223 tokens**. Both snapshots are unfinished and
+not synchronized comparisons; no memory benefit or model superiority is claimed.
+Actual rolling-summary execution still needs verification after its interval.
+
+CPU repair v4 is officially ERROR. Final log proves `nvrtc.h` was missing after
+cuBLAS integration: the library filter excluded all `nvidia-cuda-*` packages,
+including NVRTC. Repair v5 excludes only the specific compiler/runtime/CCCL
+packages when extending the overlay; NVRTC and other CUDA libraries now remain
+eligible. Added a compile probe including cuBLAS, NVRTC and CUDA standard headers
+before the full native build. Python compilation and Bash syntax passed. V5
+upload hashes and v4 final logs are retained; GPU experiments were not changed.
+V5 was subsequently re-polled RUNNING; four targeted offline packaging tests pass.
 
 Swift 1.5 is a public reasoning-efficient derivative. An existing AutoRound INT4
 mirror permits a target-only experiment with the original runtime/draft rather

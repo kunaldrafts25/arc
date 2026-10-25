@@ -147,6 +147,15 @@ RUNTIME="$ROOT/runtime/bin/python"
 # The compiler-only environment has no cuBLAS. Use the already-installed Torch
 # dependency's development files, retaining the separate 13.3 compiler headers.
 "$RUNTIME" "$SOURCE_FILES/cuda_overlay.py" "$ROOT/cuda" --libraries-only
+cat > "$ROOT/library-probe.cu" <<'CUDA'
+#include <cuda_runtime.h>
+#include <cuda/std/array>
+#include <cublasLt.h>
+#include <nvrtc.h>
+__global__ void library_probe(float* x) { x[threadIdx.x] = 1.0f; }
+CUDA
+"$CUDACXX" -ccbin "$CXX" -arch=sm_120f -std=c++17 -cubin "$ROOT/library-probe.cu" -o "$ROOT/library-probe.cubin"
+echo 'CPU CUDA library-header compilation probe passed'
 "$RUNTIME" "$ROOT/source/scripts/pennyroyal/flashinfer/install.py"
 "$RUNTIME" "$ROOT/source/scripts/pennyroyal/flashinfer/install.py" --check
 "$RUNTIME" "$SOURCE_FILES/package_overlay.py" package "$OUT" "$ROOT/base-packages.json"

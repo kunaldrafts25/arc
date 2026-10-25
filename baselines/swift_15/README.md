@@ -37,8 +37,10 @@ agent, prompts, tools and scheduling; no rolling summaries or v3 overlay. The
 notebook uses a distinct ID and default output directory. Upload hashes are in
 `reports/kaggle/duck-swift-v1/upload.json`.
 
-The current input checks passed; GPU loading, inference, game quality and hidden
-score are not established. Do not replace either running comparison version.
+Input checks and the local model health check passed. Its public gameplay window
+ends 25 October 20:32:58 UTC / 26 October 02:02:58 IST. Readiness alone does not
+establish generated tokens, game quality or hidden score. Do not replace either
+running comparison version.
 
 Swift's custom license and Qwen's base license apply separately from the
 Apache-2.0 agent. Their texts and notice are retained from parent revision

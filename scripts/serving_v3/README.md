@@ -70,8 +70,12 @@ Version 3 passed `pip check`, then FlashInfer compilation failed on missing
 development files. Version 4 extends the overlay with those installed libraries,
 preserving the isolated CUDA compiler/runtime/CCCL 13.3 packages. The GPU
 installer performs the same extension step after installing its runtime.
-Exact live ref: `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/4`.
-Observer session 72918 writes `reports/kaggle/pennyroyal-v3-repair-v4/live.log`.
+Version 4 is ERROR: the library-extension filter also excluded NVRTC, leaving
+`nvrtc.h` unavailable. Version 5 excludes only the specific compiler packages,
+allows NVRTC and other library packages, and compiles a cuBLAS/NVRTC/CCCL header
+probe before the full FlashInfer build.
+Current ref: `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/5`.
+Observer session 29593 writes `reports/kaggle/pennyroyal-v3-repair-v5/live.log`.
 Preserve original wheel paths in an archive when packaging the final overlay;
 direct wheel uploads can alter filenames while leaving their contents unchanged.
 

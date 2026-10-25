@@ -17,7 +17,9 @@ for dist in sorted(md.distributions(),key=lambda d:d.metadata['Name']):
         continue
     # Keep compiler/runtime/CCCL 13.3 from the separate compiler environment.
     # Add Torch's library headers and libraries (notably cuBLAS) afterwards.
-    if libraries_only and (name.startswith('nvidia-cuda-') or name=='nvidia-nvvm'):
+    compiler_packages=('nvidia-cuda-nvcc','nvidia-cuda-crt','nvidia-cuda-runtime','nvidia-cuda-cccl','nvidia-nvvm')
+    package=name.removesuffix('-cu13').removesuffix('-cu12')
+    if libraries_only and package in compiler_packages:
         continue
     for entry in dist.files or ():
         parts=entry.parts
@@ -44,3 +46,4 @@ assert 'release 13.3,' in version,version
 print(version)
 if libraries_only:
     assert (root/'include/cublasLt.h').is_file(), 'Missing cuBLAS development headers'
+    assert (root/'include/nvrtc.h').is_file(), 'Missing NVRTC development headers'
