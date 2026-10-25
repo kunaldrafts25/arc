@@ -1,7 +1,7 @@
 """Package the attributed public Franzen M2 baseline for offline Kaggle runs.
 
-The model, serving stack, prompts and competition controls remain upstream.
-Only non-competition evaluation scope and result validation are changed.
+Defaults reproduce the agent. Optional runtime, deadline and memory experiments
+are declared separately in provenance and use distinct notebook IDs.
 """
 import argparse
 from copy import deepcopy
@@ -16,9 +16,13 @@ SOURCE_META = SOURCE.with_name('upstream-metadata.json')
 PREFIXES = ('ft09', 'ls20', 'r11l', 'vc33', 'bp35')
 
 
-def build(mode='preflight', contest_reserve_seconds=None, runtime_overlay_dataset=None, runtime_overlay_sha256=None):
+def build(mode='preflight', contest_reserve_seconds=None, runtime_overlay_dataset=None, runtime_overlay_sha256=None, agent_variant='baseline'):
     if mode not in ('preflight', 'benchmark'):
         raise ValueError(mode)
+    if agent_variant not in ('baseline','rolling-summary'):
+        raise ValueError(agent_variant)
+    if agent_variant!='baseline' and runtime_overlay_dataset is not None:
+        raise ValueError('Evaluate memory and runtime changes separately first')
     if contest_reserve_seconds is not None and not 120 <= contest_reserve_seconds < 32400:
         raise ValueError('Contest finalization reserve must be between 120 and 32399 seconds')
     if runtime_overlay_dataset is not None:
@@ -53,6 +57,18 @@ def build(mode='preflight', contest_reserve_seconds=None, runtime_overlay_datase
     if contest_reserve_seconds is not None:
         provenance['competition_finalization_reserve_seconds'] = contest_reserve_seconds
         provenance['competition_changes'] = 'Global notebook deadline with finalization reserve; agent/model/prompts/tools/serving/scheduling settings unchanged'
+    if agent_variant=='rolling-summary':
+        overrides=dict(ARC3_SUMMARY_INTERVAL_TOKENS=48*1024,ARC3_SUMMARY_MAX_GEN=4096,
+                       ARC3_SUMMARY_TURN_CONTEXT='1',ARC3_DRAIN_STOP_AT_SUMMARIES='1')
+        configuration=next(c for c in notebook['cells'] if '\nos.environ.update({k: str(v) for k,v in setup_env.items()})' in c['source'])
+        anchor='os.environ.update({k: str(v) for k,v in setup_env.items()})'
+        assert configuration['source'].count(anchor)==1
+        configuration['source']=configuration['source'].replace(anchor,
+            '# ARC-Hydra rolling-summary experiment.\nsetup_env.update('+repr(overrides)+')\n'+anchor)
+        provenance.update(agent_variant=agent_variant,agent_environment_overrides=overrides)
+        provenance['competition_changes']='Periodic summaries and summary-aware context draining; original model, serving, tools and scheduler retained'
+        if contest_reserve_seconds is not None:
+            provenance['competition_changes']+=f'; {contest_reserve_seconds}-second finalization reserve'
     if runtime_overlay_dataset is not None:
         provenance.update(runtime_overlay_dataset=runtime_overlay_dataset,
                           runtime_overlay_manifest_sha256=runtime_overlay_sha256,
@@ -127,6 +143,8 @@ if not TRUE_SUBMISSION:
                         'Experimental v3 serving overlay; GPU correctness and performance unverified. ')
     configuration_note+=('Original competition time controls retained.' if contest_reserve_seconds is None else
                          f'Contest deadline includes startup and reserves {contest_reserve_seconds} seconds for finalization.')
+    if agent_variant=='rolling-summary':
+        configuration_note+=' Experimental periodic summaries with summary-aware history draining; benefit unproven.'
     notebook['cells'].insert(0, dict(cell_type='markdown', metadata={}, source=(
         '# ARC-Hydra: attributed Duck M2 reproduction\n\n'
         'Original agent and serving code: **Daniel Franzen**, building on '
@@ -146,6 +164,8 @@ if not TRUE_SUBMISSION:
         metadata['dataset_sources'].append(runtime_overlay_dataset)
         metadata['id']='kunalsinghh25/arc-hydra-duck-v3-runtime'
         metadata['title']='ARC Hydra Duck V3 Runtime'
+    if agent_variant=='rolling-summary':
+        metadata.update(id='kunalsinghh25/arc-hydra-duck-summary',title='ARC Hydra Duck Summary')
     return notebook, metadata, provenance
 
 
@@ -156,9 +176,11 @@ def main():
     parser.add_argument('--contest-reserve-seconds',type=int)
     parser.add_argument('--runtime-overlay-dataset')
     parser.add_argument('--runtime-overlay-sha256')
+    parser.add_argument('--agent-variant',choices=('baseline','rolling-summary'),default='baseline')
     args = parser.parse_args()
-    notebook, metadata, provenance = build(args.mode,args.contest_reserve_seconds,args.runtime_overlay_dataset,args.runtime_overlay_sha256)
-    output=args.output or ('notebooks/duck_v3_runtime' if args.runtime_overlay_dataset else 'notebooks/duck_m2')
+    notebook, metadata, provenance = build(args.mode,args.contest_reserve_seconds,args.runtime_overlay_dataset,args.runtime_overlay_sha256,args.agent_variant)
+    output=args.output or ('notebooks/duck_summary' if args.agent_variant=='rolling-summary' else
+                          'notebooks/duck_v3_runtime' if args.runtime_overlay_dataset else 'notebooks/duck_m2')
     destination = (ROOT/output).resolve()
     if not destination.is_relative_to(ROOT):
         raise ValueError('Notebook output must stay inside the workspace')

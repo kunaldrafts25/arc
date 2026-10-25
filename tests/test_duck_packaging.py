@@ -95,3 +95,23 @@ def test_competition_finalization_budget_includes_model_startup():
     # output writing; a fresh per-game nine-hour timer cannot extend this cap.
     assert namespace['soft_end'].timestamp()-(start_epoch+33*60)==32400-600-33*60
     assert provenance['competition_finalization_reserve_seconds']==600
+
+
+def test_summary_experiment_changes_only_agent_environment_before_it_is_exported():
+    baseline,base_meta,_=build('benchmark')
+    variant,metadata,provenance=build('benchmark',agent_variant='rolling-summary')
+    def behavior(source):
+        return '\n'.join(line for line in source.splitlines() if 'Path(WORKING_DIR / "hydra_provenance.json").write_text' not in line)
+    differences=[(a['source'],b['source']) for a,b in zip(baseline['cells'],variant['cells'])
+                 if a['cell_type']=='code' and behavior(a['source'])!=behavior(b['source'])]
+    assert len(differences)==1  # Serving, tools, budget and evaluation stay matched.
+    source=differences[0][1]
+    hook=source.split('# ARC-Hydra rolling-summary experiment.\n',1)[1]
+    environment={}
+    exec(hook,dict(setup_env={},os=SimpleNamespace(environ=environment)))
+    assert environment=={key:str(value) for key,value in provenance['agent_environment_overrides'].items()}
+    assert environment['ARC3_SUMMARY_INTERVAL_TOKENS']=='49152'
+    assert metadata['id']!=base_meta['id']
+    assert metadata['model_sources']==base_meta['model_sources']
+    assert metadata['dataset_sources']==base_meta['dataset_sources']
+    assert metadata['enable_internet'] is False

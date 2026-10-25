@@ -1,5 +1,6 @@
 """Audit actual model-gameplay evidence from a completed public notebook run."""
 import argparse
+from datetime import datetime
 import json
 from pathlib import Path
 from statistics import mean
@@ -51,11 +52,25 @@ def analyze(directory):
     benchmark = directory/'benchmark.json'
     corrections = []
     if benchmark.exists():
-        runs = json.loads(benchmark.read_text(encoding='utf-8'))['game_runs']
+        raw = json.loads(benchmark.read_text(encoding='utf-8'))
+        runs = raw['game_runs']
         rows, corrections = reconcile_tokens(rows, runs)
     result = summarize(rows)
     result['token_accounting_corrections'] = corrections
     result['token_accounting_basis'] = 'Action-record generation plus terminal no-action generation; cancellation notes may include additional uncharged generation.'
+    if benchmark.exists():
+        completion_times=[]
+        for run in runs:
+            if sum(run['actions_per_level'])!=len(run['history']):
+                raise ValueError('Action counts cannot locate level completions')
+            offset=(datetime.fromisoformat(run['started_at'])-datetime.fromisoformat(raw['start_time'])).total_seconds()
+            position=0
+            for count in run['actions_per_level'][:run['levels_completed']]:
+                if count<=0:
+                    raise ValueError('Completed level has no recorded action')
+                position+=count
+                completion_times.append(offset+run['history'][position-1]['wallclock_seconds'])
+        result['public_level_completions_by_elapsed_seconds']={str(t):sum(x<=t for x in completion_times) for t in (1800,3600,5400,7200)}
     (directory/'analysis.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')
     return result
 

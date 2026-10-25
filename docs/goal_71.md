@@ -104,6 +104,43 @@ Read-only status/output commands:
 
 ## Next decisions from evidence
 
+### Current state: 25 October, approximately 18:03 UTC
+
+- Previous turn made progress: repaired dependency packaging, preserved the
+  native wheel and launched CPU repair version 3. It has now ended ERROR.
+- GPU baseline version 2 is COMPLETE. Final public mean **43.76212092097825**,
+  **102 levels, five full wins**, all 25 games with verified gameplay, no crashes.
+  Full evidence and diagnostic interpretation: `reports/kaggle/duck-m2-benchmark-v2/findings.md`.
+- Six weak-game request files audited: 395 completed responses, 808,231 tokens,
+  24 ordinary tool errors, seven guard stops. BP35 generated 58,236 tokens over
+  16 responses at one action counter, with large prompt reductions. This is a
+  memory hypothesis, not proof that trimming caused failure or that thinking
+  without actions is wasteful. No automatic stall cutoff was added.
+- A matched public memory experiment is officially RUNNING:
+  `kunalsinghh25/arc-hydra-duck-summary/1`. Same model/runtime, all 25 games,
+  one pass, two-hour gameplay after readiness. Existing upstream rolling
+  summaries enabled every 49,152 new context tokens, cap 4,096, current-turn
+  context and summary-aware draining. Observer **98131** writes
+  `reports/kaggle/duck-summary-v1/live.log`. Model serving has launched; readiness
+  and actual summary execution are not yet established. Do not restart it.
+- CPU repair v3 passed dependencies, then native FlashInfer compilation failed
+  on missing `cublasLt.h`. Its final `v3-build.log` is retained. Repair **v4**
+  adds Torch's already installed CUDA-library development files to the isolated
+  compiler overlay while keeping compiler/runtime/CCCL 13.3. It is officially
+  RUNNING: `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/4`.
+  Observer **72918**, `reports/kaggle/pennyroyal-v3-repair-v4/live.log`.
+- Latest official quota read: 5.58/30 GPU hours used, 24.42 remaining. No billing
+  changes. Official competition submission allowance still requires a fresh
+  check after UTC date rollover; official score remains 0.02. The hidden-score
+  baseline and score above 71.48 remain unverified.
+- Local checks: **51 passed**, including experiment isolation and configuration
+  export. The original baseline upload remains intact.
+
+Next: preserve both exact live jobs. Require actual summaries before interpreting
+the memory result. Require CPU compilation plus fresh offline checks before any
+GPU runtime integration. Once official allowance returns, evaluate a validated
+candidate on hidden games; public 43.76 does not establish that score.
+
 ### Update: 25 October, approximately 16:31 UTC
 
 - Previous question turn produced new evidence: the live public benchmark had

@@ -144,6 +144,9 @@ RUNTIME="$ROOT/runtime/bin/python"
 # Include it in the frozen overlay rather than tolerating startup import errors.
 "$UV" pip install --python "$RUNTIME" 'wrapt==1.17.3'
 "$RUNTIME" -m pip check
+# The compiler-only environment has no cuBLAS. Use the already-installed Torch
+# dependency's development files, retaining the separate 13.3 compiler headers.
+"$RUNTIME" "$SOURCE_FILES/cuda_overlay.py" "$ROOT/cuda" --libraries-only
 "$RUNTIME" "$ROOT/source/scripts/pennyroyal/flashinfer/install.py"
 "$RUNTIME" "$ROOT/source/scripts/pennyroyal/flashinfer/install.py" --check
 "$RUNTIME" "$SOURCE_FILES/package_overlay.py" package "$OUT" "$ROOT/base-packages.json"

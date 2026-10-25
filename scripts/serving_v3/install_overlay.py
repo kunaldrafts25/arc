@@ -98,6 +98,7 @@ def install(root, base, venv, uv, port):
                PATH=f'{gcc}/bin:{cuda}/bin:{venv}/bin:'+env.get('PATH',''),
                LD_LIBRARY_PATH=f'{gcc}/lib:{cuda}/lib64:'+env.get('LD_LIBRARY_PATH',''))
     run([venv/'bin/python','-m','pip','check'],env)
+    run([venv/'bin/python',root/'cuda_overlay.py',cuda,'--libraries-only'],env)
     run([cuda/'bin/nvcc','--version'],env)
     run([venv/'bin/python','-c',
          'import importlib.metadata as m; '

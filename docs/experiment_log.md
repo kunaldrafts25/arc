@@ -238,3 +238,26 @@ verified completed artifact and its manifest SHA. Not yet GPU tested or uploaded
 50 local tests and Bash syntax checks passed. The running baseline is unchanged;
 latest unfinished public snapshot mean 28.19, two full wins. No new official
 competition score and no evidence yet of a score above 71.48.
+
+## 2026-10-25: completed baseline and rolling-summary experiment
+
+GPU baseline version 2 COMPLETE: public mean 43.7621, 102 levels, five full wins,
+all 25 games with model gameplay. No accounting correction was needed. Level
+completion curve at 30/60/90/120 minutes: 37/63/84/102. Per-action wallclock is an
+elapsed timestamp; summing those fields would overcount runtime. Final metrics
+and six weak-game request audits are retained in `reports/kaggle/duck-m2-benchmark-v2`.
+
+BP35 spent 58,236 completion tokens over 16 responses at one action counter and
+had three large prompt reductions. This suggests testing memory retention;
+neither causality nor waste is established. Matched all-25-game rolling-summary
+experiment `kunalsinghh25/arc-hydra-duck-summary/1` is RUNNING, same model/runtime
+and two-hour gameplay budget. Enable upstream periodic summaries (49,152 new
+tokens, 4,096 output cap), current-turn context and summary-aware drains. No
+summary result yet; require actual summary production before comparison.
+
+CPU repair v3 ERROR after passing dependencies: missing cuBLAS development header
+during FlashInfer build. Repair v4 uses Torch's installed library files to extend
+the compiler overlay and is RUNNING. No GPU runtime improvement established.
+GPU quota checked before the memory experiment: 24.42 of 30 hours remaining.
+51 local tests passed. Official hidden score remains 0.02 and the >71.48 goal is
+still active. Exact version hashes and observer handles are in `docs/goal_71.md`.

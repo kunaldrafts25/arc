@@ -10,12 +10,26 @@ import re
 def profile(records):
     responses = prompt_tokens = cached_tokens = completion_tokens = cache_rows = 0
     seen_tools, errors, finishes = set(), [], Counter()
+    action_groups, prompt_decreases = [], []
+    previous_prompt = None
     for record in records:
         if record.get('event') != 'response':
             continue
         responses += 1
         usage = record.get('usage') or {}
         completion_tokens += usage.get('completion_tokens',0)
+        action = record.get('action')
+        if action is not None:
+            if not action_groups or action_groups[-1]['action'] != action:
+                action_groups.append(dict(action=action,responses=0,completion_tokens=0))
+            action_groups[-1]['responses'] += 1
+            action_groups[-1]['completion_tokens'] += usage.get('completion_tokens',0)
+        prompt = usage.get('prompt_tokens')
+        if prompt is not None:
+            if previous_prompt is not None and previous_prompt-prompt >= 8192:
+                prompt_decreases.append(dict(analysis_step=record.get('analysis_step'),
+                                             action=action,before=previous_prompt,after=prompt))
+            previous_prompt=prompt
         details = usage.get('prompt_tokens_details') or {}
         if 'cached_tokens' in details and usage.get('prompt_tokens',0)>0:
             prompt_tokens += usage['prompt_tokens']
@@ -52,6 +66,10 @@ def profile(records):
                 distinct_visible_tool_results=len(seen_tools),tool_errors=errors,
                 ordinary_tool_errors=sum(not e['guard_stop'] for e in errors),
                 observed_stale_state_guard_stops=sum(e['guard_stop'] for e in errors),
+                longest_same_action_response_group=max(action_groups,key=lambda g:g['responses'],default=None),
+                most_tokens_at_one_action=max(action_groups,key=lambda g:g['completion_tokens'],default=None),
+                large_prompt_token_decreases=prompt_decreases,
+                interpretation='Repeated action counters measure computation without a recorded game action; computation may be useful. Prompt decreases do not prove forgetting or establish a causal effect on score.',
                 finish_reasons=dict(finishes))
 
 
@@ -74,7 +92,7 @@ def audit(directory):
                   completed_response_tokens=sum(g['completed_response_tokens'] for g in games.values()),
                   ordinary_tool_errors=sum(g['ordinary_tool_errors'] for g in games.values()),
                   observed_stale_state_guard_stops=sum(g['observed_stale_state_guard_stops'] for g in games.values()),
-                  boundary='Completed-response usage excludes unfinished generation. Tool results are deduplicated by call ID within each game; not every completed response necessarily exposes its final tool result. Public preflight only.')
+                  boundary='Completed-response usage excludes unfinished generation. Tool results are deduplicated by call ID within each game; not every completed response necessarily exposes its final tool result. Cached public-game files may cover only a subset of a run.')
     (directory/'request-audit.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')
     return result
 

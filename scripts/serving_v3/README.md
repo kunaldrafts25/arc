@@ -65,8 +65,13 @@ kernel input. Version 2 used the ready private dataset but failed its early inpu
 check: Kaggle stripped `+` from the wheel filename. The dataset file listing
 confirmed this. Version 3 accepts that sanitized filename, verifies the original
 content hash and restores the valid wheel name before installation.
-Exact live ref: `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/3`.
-Observer session 5080 writes `reports/kaggle/pennyroyal-v3-repair-v3/live.log`.
+Version 3 passed `pip check`, then FlashInfer compilation failed on missing
+`cublasLt.h`: the separate compiler environment omitted Torch's CUDA-library
+development files. Version 4 extends the overlay with those installed libraries,
+preserving the isolated CUDA compiler/runtime/CCCL 13.3 packages. The GPU
+installer performs the same extension step after installing its runtime.
+Exact live ref: `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/4`.
+Observer session 72918 writes `reports/kaggle/pennyroyal-v3-repair-v4/live.log`.
 Preserve original wheel paths in an archive when packaging the final overlay;
 direct wheel uploads can alter filenames while leaving their contents unchanged.
 

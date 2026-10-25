@@ -9,9 +9,15 @@ import subprocess
 import sys
 
 root=Path(sys.argv[1]).absolute()
-root.mkdir()
+libraries_only='--libraries-only' in sys.argv[2:]
+root.mkdir(exist_ok=libraries_only)
 for dist in sorted(md.distributions(),key=lambda d:d.metadata['Name']):
-    if not dist.metadata['Name'].lower().replace('_','-').startswith('nvidia-'):
+    name=dist.metadata['Name'].lower().replace('_','-')
+    if not name.startswith('nvidia-'):
+        continue
+    # Keep compiler/runtime/CCCL 13.3 from the separate compiler environment.
+    # Add Torch's library headers and libraries (notably cuBLAS) afterwards.
+    if libraries_only and (name.startswith('nvidia-cuda-') or name=='nvidia-nvvm'):
         continue
     for entry in dist.files or ():
         parts=entry.parts
@@ -27,7 +33,8 @@ for dist in sorted(md.distributions(),key=lambda d:d.metadata['Name']):
                 raise RuntimeError(f'Conflicting CUDA files: {dest}')
         else:
             dest.symlink_to(source)
-(root/'lib').symlink_to('lib64')
+if not (root/'lib').is_symlink():
+    (root/'lib').symlink_to('lib64')
 for name in ('bin/nvcc','bin/ptxas','include/cuda.h','include/cuda_runtime.h',
              'include/crt/host_config.h','nvvm/libdevice/libdevice.10.bc'):
     assert (root/name).is_file(),name
@@ -35,3 +42,5 @@ assert (root/'include/cccl/cuda/std').is_dir()
 version=subprocess.check_output([str(root/'bin/nvcc'),'--version'],text=True)
 assert 'release 13.3,' in version,version
 print(version)
+if libraries_only:
+    assert (root/'include/cublasLt.h').is_file(), 'Missing cuBLAS development headers'
