@@ -17,6 +17,7 @@ manifest = {
     "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
     "sha256": {p: sha256((ROOT/p).read_bytes()).hexdigest() for p in paths},
     "validation_boundary": "Local public gameplay and Kaggle v3 offline public smoke verified; v0.2 hidden score pending",
+    "competition_submission": "57630597",
 }
 destination = ROOT.parent / "arc-hydra-v0.2.zip"
 with ZipFile(destination, "w", compression=ZIP_DEFLATED, compresslevel=9) as archive:

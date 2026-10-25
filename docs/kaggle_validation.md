@@ -10,8 +10,11 @@ The FT09 commit-mode regression now requires a full win. Competition reruns
 skip the public smoke and retain the official gateway workflow.
 
 The candidate uses reasoning with a 300-action guard. This is target runtime
-validation on public data, not a new leaderboard result. An official allowance
-check on 25 October returned one competition submission remaining.
+validation on public data. After the matched 75-run public comparison improved
+from 0.150198925 to 3.942818150 without exceptions, notebook version 3 was entered
+as competition submission **57630597** on 25 October. Kaggle accepted it and
+reported zero submissions remaining today. Acceptance does not establish its
+hidden score; see the official status/history files for that result.
 
 Account/notebook: https://www.kaggle.com/code/kunalsinghh25/arc-hydra-arc-agi-3
 

@@ -108,3 +108,34 @@ An early persistence run started while the game cache was still populating, was 
 - Measured under profiling with other experiments running: agent loop 4.448 s; choose_action 4.076 s; connected-component extraction 3.858 s (197 calls).
 - Interpretation: component extraction dominates policy CPU time in this click game. This is a measured runtime hotspot, not the main demonstrated scoring failure: total time is still below the local guard, while goal-directed completion is weak.
 - Decision: INVESTIGATE vectorized/run-length labeling later if actual Kaggle runtime is binding. Do not add an unverified binary dependency merely to optimize local speed. Profile timings are not target GPU/runtime estimates.
+
+## MECHANICS-02 — learned mechanics and visual goals, 25 October 2026
+
+- Hypothesis: intervention-based motion/tile models and example-based visual
+  goals will outperform state novelty when action effects are regular.
+- Changes: meter abstraction, inferred displacement controls, binary XOR and
+  prime-cycle models, observed glyph equality/inequality programs, partial-panel
+  constraints, marked-tile recognition and prediction checks. No game-ID policy.
+- Evidence: `reports/v02` raw local scorecards and source snapshots. Intermediate
+  experiments and failure diagnoses are described in `docs/v02_development.md`.
+- Matched comparison: all 25 public games, environment seed 0, policy seeds
+  0–2, strict 300-action cap, 75 runs each. Novelty mean 0.150198925, six level
+  completions, no full wins. Candidate mean 3.942818150, 27 level completions,
+  three full wins. Neither recorded exceptions.
+- Concentration: all full wins are FT09. The candidate regresses on some games;
+  gains do not establish a generally capable solver or unseen-task accuracy.
+- Additional policy seeds 3 and 4 are evaluated separately. They change policy
+  randomness, not game layout, and do not constitute unseen tasks.
+- Additional-seed result: 50 runs, mean 3.953284272, 17 completed levels, two
+  full wins, no exceptions. All 125 candidate runs: mean 3.947004599,
+  44 completed levels, five full wins, no exceptions. Coverage/source digests
+  validated by `scripts/report_v02.py --require-complete`; per-game summary in
+  `reports/v02/comparison.json`.
+- Local validation: 38 tests pass; extracted notebook source imports and chooses
+  a legal complex action in an isolated interpreter.
+- Target validation: private Kaggle version 3 COMPLETE; six FT09 levels and WIN
+  in 159 actions, plus LS20/VC33 smoke actions, no exceptions.
+- Decision: PROMOTE v0.2 reasoning/300 as the measured candidate; retain novelty
+  for comparisons. Submitted as 57630597, initially PENDING, no evaluation error.
+  This used the available daily attempt. Hidden results must come from the
+  official status API, independently of these public measurements.

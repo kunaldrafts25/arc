@@ -54,6 +54,19 @@ large null spaces use bounded sampling. Navigation still tests uncertain goals
 and can waste actions. A matched visual hypothesis is not proof of game victory:
 only the official environment's WIN counts as a full completion.
 
-Promote a release only after the broad candidate finishes without exceptions,
-then validate the bundled source in Kaggle's offline runtime before entering it.
-The official allowance check on 25 October reports one submission remaining.
+The matched comparison finished: 75 runs per policy at 300 actions, public
+environment seed 0, policy seeds 0–2. Baseline mean score was 0.150198925,
+with six completed levels and no full wins. Candidate mean was 3.942818150,
+with 27 completed levels and three full wins. Both recorded zero exceptions.
+All full wins are FT09; this is not broad task mastery. Additional policy seeds
+3 and 4 completed all 50 runs: mean score 3.953284272, 17 level completions,
+two full wins and no exceptions. Across all 125 candidate runs: mean
+3.947004599, 44 completed levels, five full wins and no exceptions.
+`reports/v02/comparison.json` contains the coverage-checked, source-digest-checked
+summary and per-game comparisons. Reproduce with
+`python scripts/report_v02.py --require-complete`.
+
+Kaggle notebook version 3 completed its offline regression: FT09 WIN in 159
+actions, two short smoke checks, no exceptions. Competition submission
+57630597 was accepted on 25 October, using the one available attempt. Its
+official status is recorded in `reports/kaggle/submission-status.json`.

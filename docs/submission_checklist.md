@@ -25,7 +25,7 @@ For diagnosis, add `--record` to benchmark.py. The official recorder saves raw f
 - Kaggle username: kunalsinghh25; private notebook ID kunalsinghh25/arc-hydra-arc-agi-3.
 - Project-local Kaggle token: configured and validated after initial inspection. Authentication is handled by scripts/kaggle_local.py.
 - Notebook version 3: COMPLETE; FT09 full WIN in 159 actions plus two 20-action smoke checks, no exceptions.
-- Previous competition submission 57601062: COMPLETE, score 0.01. Verify the current allowance through the official CLI before entering a candidate.
+- Previous competition submission 57601062: COMPLETE, score 0.01. Version 3 was accepted as 57630597 on 25 October; read the status file for its result. The submission command reported zero attempts remaining that day. Verify current allowance through the official CLI before another entry.
 
 ## Remote workflow
 
