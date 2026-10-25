@@ -305,3 +305,14 @@ CPU v4 subsequently ended ERROR on missing `nvrtc.h`. The CUDA library filter
 was excluding NVRTC along with compiler packages. V5 narrows that exclusion and
 adds a cuBLAS/NVRTC/CCCL compile probe before native compilation. Launched only
 after authoritative v4 ERROR; Python/Bash syntax checked. GPU versions unchanged.
+
+V5 later passed dependency checking and the cuBLAS/NVRTC/CCCL SM120f compile
+probe, clearing the two observed header omissions. Native module completion and
+fresh offline reinstall remain unverified. Structured stage evidence is in its
+`header-probe.json`; observer 39736 replaced a disconnected observer without
+restarting the cloud job. Both GPU comparisons remain running.
+
+Inspected the existing sandbox/perception API before adding tools: connected
+components, color/shape/rotation hashes, adjacency and movement are already
+available. A duplicate component detector is not justified. Retain failure-trace
+analysis as the basis for any additional perception intervention.

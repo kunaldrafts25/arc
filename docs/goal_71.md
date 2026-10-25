@@ -14,7 +14,7 @@ jobs live. This continuation found and launched a separate model experiment.
 | Exact job | Last official status | Observer session |
 |---|---|---|
 | `kunalsinghh25/arc-hydra-duck-summary/1` | RUNNING, health passed; public gameplay deadline 20:34:08 UTC | 98131 |
-| `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/5` | RUNNING, CPU NVRTC-header repair | 39736 |
+| `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/5` | RUNNING, library-header probe passed; native build pending | 39736 |
 | `kunalsinghh25/arc-hydra-duck-swift/1` | RUNNING, health passed; public gameplay deadline 20:32:58 UTC | 11072 |
 
 Logs are `reports/kaggle/duck-summary-v1/live.log`,
@@ -51,6 +51,16 @@ V5 was subsequently re-polled RUNNING; four targeted offline packaging tests pas
 Its first log observer (29593) later exhausted reconnect attempts and exited.
 The exact v5 cloud job was re-polled RUNNING; only the observer was reconnected,
 as session 39736. Both GPU gameplay runs continue on their original versions.
+At approximately 19:15 UTC / 00:45 IST, v5 passed dependency checks and the
+new cuBLAS/NVRTC/CCCL SM120f header-compilation probe. Structured stage evidence
+is `reports/kaggle/pennyroyal-v3-repair-v5/header-probe.json`. This gets past the
+two observed missing-header failures but does not prove native module completion,
+fresh offline installation or GPU performance.
+
+Independent tool-API inspection found that component segmentation, rotation
+hashes, adjacency and cross-frame movement already exist in the published
+agent. Do not add a redundant component detector. Further perception changes
+need concrete trace evidence and a separate controlled evaluation.
 
 Swift 1.5 is a public reasoning-efficient derivative. An existing AutoRound INT4
 mirror permits a target-only experiment with the original runtime/draft rather

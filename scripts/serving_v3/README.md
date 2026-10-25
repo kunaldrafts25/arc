@@ -76,6 +76,11 @@ allows NVRTC and other library packages, and compiles a cuBLAS/NVRTC/CCCL header
 probe before the full FlashInfer build.
 Current ref: `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/5`.
 Observer session 29593 writes `reports/kaggle/pennyroyal-v3-repair-v5/live.log`.
+That observer subsequently expired; the exact cloud job remained RUNNING and
+observer 39736 now follows it. V5 live evidence confirms dependency checks and
+the cuBLAS/NVRTC/CCCL SM120f compilation probe passed. Full native compilation
+and fresh offline verification are still pending; see `header-probe.json` in
+the version-5 report directory.
 Preserve original wheel paths in an archive when packaging the final overlay;
 direct wheel uploads can alter filenames while leaving their contents unchanged.
 
