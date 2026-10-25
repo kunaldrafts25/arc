@@ -14,7 +14,7 @@ jobs live. This continuation found and launched a separate model experiment.
 | Exact job | Last official status | Observer session |
 |---|---|---|
 | `kunalsinghh25/arc-hydra-duck-summary/1` | RUNNING, health passed; public gameplay deadline 20:34:08 UTC | 98131 |
-| `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/5` | RUNNING, CPU NVRTC-header repair | 29593 |
+| `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/5` | RUNNING, CPU NVRTC-header repair | 39736 |
 | `kunalsinghh25/arc-hydra-duck-swift/1` | RUNNING, health passed; public gameplay deadline 20:32:58 UTC | 11072 |
 
 Logs are `reports/kaggle/duck-summary-v1/live.log`,
@@ -48,6 +48,9 @@ eligible. Added a compile probe including cuBLAS, NVRTC and CUDA standard header
 before the full native build. Python compilation and Bash syntax passed. V5
 upload hashes and v4 final logs are retained; GPU experiments were not changed.
 V5 was subsequently re-polled RUNNING; four targeted offline packaging tests pass.
+Its first log observer (29593) later exhausted reconnect attempts and exited.
+The exact v5 cloud job was re-polled RUNNING; only the observer was reconnected,
+as session 39736. Both GPU gameplay runs continue on their original versions.
 
 Swift 1.5 is a public reasoning-efficient derivative. An existing AutoRound INT4
 mirror permits a target-only experiment with the original runtime/draft rather
