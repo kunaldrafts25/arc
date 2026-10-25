@@ -19,7 +19,7 @@
         {
           "tool_call_id": "call_ae6b42412a0b4ecb849534f8",
           "kind": "TerminalStateActionError",
-          "guard_stop": false,
+          "guard_stop": true,
           "first_observed_analysis_step": 21,
           "message": "TerminalStateActionError: the previous action reported game_over. The level has been reset to its start, so the board you planned against is gone and this action was not executed. The next turn begins from the new state."
         },
@@ -38,8 +38,9 @@
           "message": "NameError: name 'open' is not defined"
         }
       ],
-      "ordinary_tool_errors": 4,
+      "ordinary_tool_errors": 3,
       "observed_stale_state_guard_stops": 0,
+      "observed_terminal_state_guard_stops": 1,
       "longest_same_action_response_group": {
         "action": 77,
         "responses": 16,
@@ -152,6 +153,7 @@
       ],
       "ordinary_tool_errors": 5,
       "observed_stale_state_guard_stops": 4,
+      "observed_terminal_state_guard_stops": 0,
       "longest_same_action_response_group": {
         "action": 120,
         "responses": 5,
@@ -219,6 +221,7 @@
       ],
       "ordinary_tool_errors": 1,
       "observed_stale_state_guard_stops": 0,
+      "observed_terminal_state_guard_stops": 0,
       "longest_same_action_response_group": {
         "action": 94,
         "responses": 5,
@@ -298,6 +301,7 @@
       ],
       "ordinary_tool_errors": 4,
       "observed_stale_state_guard_stops": 2,
+      "observed_terminal_state_guard_stops": 0,
       "longest_same_action_response_group": {
         "action": 5,
         "responses": 5,
@@ -361,6 +365,7 @@
       ],
       "ordinary_tool_errors": 2,
       "observed_stale_state_guard_stops": 1,
+      "observed_terminal_state_guard_stops": 0,
       "longest_same_action_response_group": {
         "action": 83,
         "responses": 7,
@@ -466,6 +471,7 @@
       ],
       "ordinary_tool_errors": 8,
       "observed_stale_state_guard_stops": 0,
+      "observed_terminal_state_guard_stops": 0,
       "longest_same_action_response_group": {
         "action": 36,
         "responses": 18,
@@ -493,7 +499,8 @@
   },
   "completed_responses": 395,
   "completed_response_tokens": 808231,
-  "ordinary_tool_errors": 24,
+  "ordinary_tool_errors": 23,
   "observed_stale_state_guard_stops": 7,
+  "observed_terminal_state_guard_stops": 1,
   "boundary": "Completed-response usage excludes unfinished generation. Tool results are deduplicated by call ID within each game; not every completed response necessarily exposes its final tool result. Cached public-game files may cover only a subset of a run."
 }

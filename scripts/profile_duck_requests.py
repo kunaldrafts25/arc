@@ -56,7 +56,7 @@ def profile(records):
             matches = re.findall(r'(?m)^([A-Za-z_][A-Za-z_0-9]*(?:Error|Exception)):',error)
             kind = matches[-1] if matches else ('SyntaxError' if error.startswith('Python syntax error') else 'OtherToolError')
             errors.append(dict(tool_call_id=identity,kind=kind,
-                               guard_stop=kind=='StaleStateActionError',
+                               guard_stop=kind in ('StaleStateActionError','TerminalStateActionError'),
                                first_observed_analysis_step=record.get('analysis_step'),
                                message=error.splitlines()[-1][:300]))
     return dict(completed_responses=responses,completed_response_tokens=completion_tokens,
@@ -65,7 +65,8 @@ def profile(records):
                 weighted_cache_fraction=cached_tokens/prompt_tokens if prompt_tokens else None,
                 distinct_visible_tool_results=len(seen_tools),tool_errors=errors,
                 ordinary_tool_errors=sum(not e['guard_stop'] for e in errors),
-                observed_stale_state_guard_stops=sum(e['guard_stop'] for e in errors),
+                observed_stale_state_guard_stops=sum(e['kind']=='StaleStateActionError' for e in errors),
+                observed_terminal_state_guard_stops=sum(e['kind']=='TerminalStateActionError' for e in errors),
                 longest_same_action_response_group=max(action_groups,key=lambda g:g['responses'],default=None),
                 most_tokens_at_one_action=max(action_groups,key=lambda g:g['completion_tokens'],default=None),
                 large_prompt_token_decreases=prompt_decreases,
@@ -92,6 +93,7 @@ def audit(directory):
                   completed_response_tokens=sum(g['completed_response_tokens'] for g in games.values()),
                   ordinary_tool_errors=sum(g['ordinary_tool_errors'] for g in games.values()),
                   observed_stale_state_guard_stops=sum(g['observed_stale_state_guard_stops'] for g in games.values()),
+                  observed_terminal_state_guard_stops=sum(g['observed_terminal_state_guard_stops'] for g in games.values()),
                   boundary='Completed-response usage excludes unfinished generation. Tool results are deduplicated by call ID within each game; not every completed response necessarily exposes its final tool result. Cached public-game files may cover only a subset of a run.')
     (directory/'request-audit.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')
     return result

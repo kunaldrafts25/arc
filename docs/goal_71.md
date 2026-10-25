@@ -106,6 +106,14 @@ Read-only status/output commands:
 
 ### Current state: 25 October, approximately 18:03 UTC
 
+Follow-up at approximately 18:09 UTC: both exact jobs were re-polled and remain
+RUNNING; no restart. Official submission-limits read confirms one used today,
+two lifetime, **zero remaining today**. This is a verified wait on specific live
+experiments, not a blocker requiring user input. Request audit corrected one
+`TerminalStateActionError` to an expected guard stop: **23 ordinary errors,
+seven stale-state stops, one terminal-state stop** in the six-file subset.
+Two targeted profiler tests pass. Earlier 24-error counts below are historical.
+
 - Previous turn made progress: repaired dependency packaging, preserved the
   native wheel and launched CPU repair version 3. It has now ended ERROR.
 - GPU baseline version 2 is COMPLETE. Final public mean **43.76212092097825**,

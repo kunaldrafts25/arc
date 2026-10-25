@@ -20,13 +20,15 @@ Raw `benchmark.json` and `hydra_model_summary.json` retain per-game outcomes.
 ## Selected weak-game request audit
 
 Six cached game logs were selected for diagnosis, not a representative estimate.
-Across them: 395 completed responses, 808,231 completion tokens, 24 ordinary tool
-errors and seven expected stale-state guard stops. Deduplicate tool messages by
+Across them: 395 completed responses, 808,231 completion tokens, 23 ordinary tool
+errors, seven expected stale-state guard stops and one terminal-state guard stop.
+The terminal-state stop was initially misclassified as an ordinary tool error.
+Deduplicate tool messages by
 call ID because every request retains earlier conversation history.
 
 | Game | Responses | Ordinary errors | Cached prompt fraction | Largest token group at one action counter | Large prompt decreases |
 |---|---:|---:|---:|---:|---:|
-| BP35 | 69 | 4 | 0.930 | 58,236 / 16 responses | 3 |
+| BP35 | 69 | 3 | 0.930 | 58,236 / 16 responses | 3 |
 | LF52 | 128 | 5 | 0.941 | 14,067 / 3 responses | 5 |
 | SK48 | 29 | 1 | 0.879 | 27,706 / 5 responses | 1 |
 | SP80 | 46 | 4 | 0.903 | 11,794 / 1 response | 2 |

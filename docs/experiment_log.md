@@ -261,3 +261,10 @@ the compiler overlay and is RUNNING. No GPU runtime improvement established.
 GPU quota checked before the memory experiment: 24.42 of 30 hours remaining.
 51 local tests passed. Official hidden score remains 0.02 and the >71.48 goal is
 still active. Exact version hashes and observer handles are in `docs/goal_71.md`.
+
+Follow-up: official submission-limits read still reports zero remaining today.
+CPU repair v4 and summary GPU v1 were re-polled RUNNING, so both are preserved.
+Corrected diagnostic classification of `TerminalStateActionError`: an expected
+terminal-state guard stop, not an ordinary Python error. Regenerated six-game
+audit now has 23 ordinary errors, seven stale-state stops and one terminal-state
+stop; two targeted tests pass. Raw traces and final scores are unchanged.
