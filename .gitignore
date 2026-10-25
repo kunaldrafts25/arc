@@ -33,4 +33,5 @@ reports/kaggle/*/diagnostics.html
 reports/kaggle/*/movies/
 reports/kaggle/*/solver_analysis/
 reports/kaggle/*/prompts/
+reports/kaggle/*/pennyroyal-v3-overlay/
 pytest-cache-files-*/

@@ -1,0 +1,18 @@
+{
+  "checked_at": "2026-10-25T15:51:35.746454+00:00",
+  "refresh_at": "2026-10-31T00:00:00",
+  "resources": {
+    "GPU": {
+      "used_hours": 4.110300400833333,
+      "reserved_hours": 0.0,
+      "allowed_hours": 30.0,
+      "pay_to_scale_enabled": false
+    },
+    "TPU": {
+      "used_hours": 0.0,
+      "reserved_hours": 0.0,
+      "allowed_hours": 20.0,
+      "pay_to_scale_enabled": false
+    }
+  }
+}

@@ -181,3 +181,38 @@ An early persistence run started while the game cache was still populating, was 
   existing cancellation mechanism. It changes lifecycle budget only.
 - Local checks: 46 pass. Model-02 performance remains unmeasured until actual
   run artifacts arrive; do not promote it from tests or RUNNING status alone.
+
+## REQUEST-AUDIT-01 — identify the next bottleneck
+
+- Completed Model-01 request logs contain 107 completed responses and 143,977
+  response-usage tokens. This includes completed analysis with no associated
+  action, unlike the 135,986 action-plus-terminal accounted tokens. In-flight
+  generation is excluded from both totals.
+- Deduplicating retained conversation tool results by call ID gives 102 visible
+  results, three ordinary errors (syntax, type and empty-iterable errors), and
+  one expected stale-action guard stop. Repeated history is not counted as
+  repeated failures. Per-game weighted cached-prompt fractions are 89.26–93.91%.
+- Source-file digests and per-game metrics are in `request-audit.json`;
+  `scripts/profile_duck_requests.py` reproduces the audit from the cached logs.
+- Decision: no blanket tool/parsing rewrite from these data. Inspect the longer
+  run for context-loss and scheduling failures. The public D-prime author also
+  reports baseline resubmission variance (27.62–31.47) overlapping the single
+  31.54 D-prime result, so that comparison alone is insufficient to select it.
+
+## SERVING-V3-BUILD-01 — independent CPU runtime experiment
+
+- Private CPU notebook `kunalsinghh25/arc-hydra-pennyroyal-v3-build/1`: RUNNING.
+  Online build only, no competition attachment, no model weights, four-hour cap.
+- Source pinned to upstream v3 commit 560edbdca18aedae13f71ae20b3984efa4d22633.
+  Compiler package versions and micromamba artifact hash are frozen. Existing
+  INT4 scale-dtype compatibility fix is retained and attributed to Franzen.
+- Actual live log verifies CUDA SM120f compiler probe success and ongoing native
+  Rust compilation. Final kernel build/offline reinstall are still unverified.
+- Required outputs: frozen delta wheels, compiler assets, license notices,
+  manifest, and `BUILD_COMPLETE` only after fresh offline-install checks.
+- Decision: prepare a possible throughput/context improvement without changing
+  the running v2.5.3 model baseline. GPU inference and score comparisons remain
+  mandatory before using this runtime in a scored candidate.
+- Local checks now total 48 passes; CPU build syntax and embedded source also
+  validated. Accelerator quota snapshot shows 4.1103 of 30 GPU hours used and
+  pay-to-scale disabled. No quota or billing setting was changed.
