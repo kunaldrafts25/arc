@@ -1,7 +1,8 @@
 import json
+from datetime import datetime
 from types import SimpleNamespace
 from scripts.build_duck_notebook import build, SOURCE
-from scripts.analyze_duck_run import summarize
+from scripts.analyze_duck_run import summarize, reconcile_tokens
 
 
 def controls(notebook):
@@ -69,3 +70,28 @@ def test_public_model_wait_never_runs_in_a_competition_rerun():
     # No public model-health call, game filter or deadline replacement is
     # allowed on the competition path. Missing variables deliberately catch it.
     exec(compile(evaluation,'public-readiness-gate','exec'),dict(TRUE_SUBMISSION=True))
+
+
+def test_final_turn_tokens_are_not_mistaken_for_total_generation():
+    rows=[dict(game_id='game',generated_tokens=0)]
+    runs=[dict(game_id='game',history=[dict(generated_tokens=120),dict(generated_tokens=80)],
+               final_generated_tokens=20)]
+    corrected, changes=reconcile_tokens(rows,runs)
+    assert rows[0]['generated_tokens']==0  # preserve raw downloaded evidence
+    assert corrected[0]['generated_tokens']==220
+    assert changes==[dict(game_id='game',reported_tokens=0,reconstructed_tokens=220)]
+
+
+def test_competition_finalization_budget_includes_model_startup():
+    notebook, _, provenance=build('benchmark',contest_reserve_seconds=600)
+    source=next(c['source'] for c in notebook['cells'] if c['source'].startswith("print('Starting benchmark...')"))
+    gate=source.split('# ARC-Hydra bounded competition finalization.\n',1)[1].split('await bm.run(',1)[0]
+    start_epoch=1700000000
+    namespace=dict(TRUE_SUBMISSION=True,NOTEBOOK_START_TIME=start_epoch,
+                   target=SimpleNamespace(max_runtime_s=32400),datetime=datetime)
+    exec(compile(gate,'contest-deadline','exec'),namespace)
+    assert namespace['soft_end'].timestamp()==start_epoch+32400-600
+    # Even after 33 minutes of setup, ten minutes remain for cancellation and
+    # output writing; a fresh per-game nine-hour timer cannot extend this cap.
+    assert namespace['soft_end'].timestamp()-(start_epoch+33*60)==32400-600-33*60
+    assert provenance['competition_finalization_reserve_seconds']==600

@@ -22,14 +22,9 @@
     "Tufa Labs"
   ],
   "license": "Apache-2.0; third-party model/runtime licenses also apply",
-  "mode": "preflight",
-  "public_games": [
-    "ft09",
-    "ls20",
-    "r11l",
-    "vc33",
-    "bp35"
-  ],
-  "public_runtime_seconds": 900,
+  "mode": "benchmark",
+  "public_games": "all 25",
+  "public_runtime_seconds": 7200,
+  "public_startup_allowance_seconds": 3600,
   "competition_changes": "None to model, prompts, tools, serving or scheduling"
 }

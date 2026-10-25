@@ -24,43 +24,46 @@ Franzen, Jeroen Cottaar and Tufa Labs. The author reports 27.89 for his submissi
 this project has not reproduced that score. Code writes and executes Python to
 investigate games; model weights and inference run locally on Kaggle.
 
-- Job: `kunalsinghh25/arc-hydra-duck-m2-baseline`, version 1.
-- Uploaded with RTX PRO 6000, internet disabled, 3,600-second notebook timeout.
-- Official status confirmed RUNNING after upload and again during source audit.
-- Output download currently returns no artifacts. The supported `kernels logs
-  --follow` endpoint exposes live stdout. It confirms the RTX PRO 6000, serving
-  runtime, 38 target shards and two linked draft shards. At the 720-second
-  upstream readiness limit the server was still loading; the benchmark then
-  began its 900-second connection-retry allowance. Model readiness and actual
-  gameplay remain unproven. Re-poll this same job; do not restart from a timeout
-  or absent interim output alone.
-- Public preflight: FT09, LS20, R11L, VC33, BP35, one pass, 900-second gameplay
-  deadline after initialization. This is a runtime/gameplay check, not a matched
-  full-score reproduction. Original competition controls are retained.
-- `scripts/build_duck_notebook.py` builds the attributed notebook; its source,
-  model mounts, container image and SHA provenance are preserved. 44 local tests
-  pass, including checks that the preflight does not alter contest controls.
-- A revision is prepared locally at `notebooks/duck_m2_next`, **not uploaded**:
-  public-only model readiness is awaited before starting the gameplay budget,
-  with a one-hour startup allowance and explicit process-exit/health checks.
-  This fixes startup consuming the public 15-minute gameplay window. It leaves
-  the agent, model, serving and competition path unchanged. If version 1 fails
-  for this reason, launch the prepared revision with `--timeout 5400` after
-  confirming version 1 is terminal. Do not replace a live run preemptively.
-- Current live-log client session: 60229; it writes the ignored transient
-  `reports/kaggle/duck-m2-preflight-v1/live.log`. The client is only an observer;
-  its timeout/exit is not evidence that the Kaggle job stopped.
-- Latest exact-version status poll: `.../arc-hydra-duck-m2-baseline/1` RUNNING.
-  The first periodic report is explicitly "in progress", with zero generated
-  tokens and only the warmup reset. It is not a terminal failed result. A
-  snapshot is saved in `startup-observation.txt`; wait for the final outcome.
+- Version 1 is **COMPLETE**. Five-game public preflight verified real model
+  gameplay: seven levels, zero full wins, subset mean score 11.397576782,
+  119 actions and 135,986 accounted generated tokens. FT09 reached level 4;
+  LS20, R11L and VC33 completed one level each; BP35 completed none.
+- Source `serve.log` records 981.72 seconds of weight loading and roughly
+  1,162 seconds of engine startup. The server became ready at 14:44:23 UTC;
+  public gameplay ended at 14:50:45. Thus only about six minutes of model-ready
+  play remained in the initial 900-second rollout. No serving crash was found.
+- Artifacts: `reports/kaggle/duck-m2-preflight-v1`. Its raw summary incorrectly
+  reads only terminal-turn tokens; the analyzer reconstructs action-plus-terminal
+  tokens from `benchmark.json`, retaining the raw file and listing corrections.
+  Cancellation notes can include additional uncharged generation. This is not
+  an official hidden score, a full-set public mean or a matched v0.2 comparison.
+- Version **2** is now the active job:
+  `kunalsinghh25/arc-hydra-duck-m2-baseline/2`, official status RUNNING.
+  All 25 public games, one pass, 7,200-second gameplay budget **after** model
+  readiness. One-hour startup allowance; 12,000-second notebook timeout.
+  Agent, model, serving, prompts and competition controls are unchanged.
+- `notebooks/duck_m2` is the uploaded benchmark source; its file hashes are in
+  `reports/kaggle/duck-m2-benchmark-v2/upload.json`. The alternate five-game
+  repair at `notebooks/duck_m2_next` is prepared but not uploaded.
+- 46 local tests pass, including public/competition separation, backend wait
+  handling, the token-accounting regression and absolute contest deadline.
+- `notebooks/duck_m2_candidate` is a **prepared, not uploaded** contest variant.
+  Its only additional competition change sets the global soft deadline to the
+  notebook's initial start + budget - 600 seconds, so startup is counted and
+  finalization has ten minutes. The current version-2 benchmark remains the
+  original competition behavior. Do not launch another version while it is live.
+- Current live-log client session: **54334**, writing the ignored transient
+  `reports/kaggle/duck-m2-benchmark-v2/live.log`. The previous observer 60229
+  ended normally. An observer failure does not mean the Kaggle job stopped.
+  Re-poll exact version 2; never restart it based only on elapsed startup time
+  or absence of final artifacts.
 
 Read-only status/output commands:
 
 ```powershell
-.venv/Scripts/python.exe scripts/kaggle_local.py kernels status kunalsinghh25/arc-hydra-duck-m2-baseline
-.venv/Scripts/python.exe scripts/kaggle_local.py kernels output kunalsinghh25/arc-hydra-duck-m2-baseline -p reports/kaggle/duck-m2-preflight-v1
-.venv/Scripts/python.exe scripts/analyze_duck_run.py reports/kaggle/duck-m2-preflight-v1
+.venv/Scripts/python.exe scripts/kaggle_local.py kernels status kunalsinghh25/arc-hydra-duck-m2-baseline/2
+.venv/Scripts/python.exe scripts/kaggle_local.py kernels output kunalsinghh25/arc-hydra-duck-m2-baseline/2 -p reports/kaggle/duck-m2-benchmark-v2
+.venv/Scripts/python.exe scripts/analyze_duck_run.py reports/kaggle/duck-m2-benchmark-v2
 ```
 
 ## Next decisions from evidence

@@ -25,4 +25,12 @@ reference/
 test-artifacts/
 # Transient live stream; final downloaded run logs remain tracked evidence.
 reports/kaggle/*/live.log
+# Redundant full requests, renderings and pickled sidecars stay locally cached.
+# Metrics, event histories, text transcripts and final server logs remain evidence.
+reports/kaggle/*/*_requests.jsonl
+reports/kaggle/*/*.pkl
+reports/kaggle/*/diagnostics.html
+reports/kaggle/*/movies/
+reports/kaggle/*/solver_analysis/
+reports/kaggle/*/prompts/
 pytest-cache-files-*/

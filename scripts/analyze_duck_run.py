@@ -28,9 +28,34 @@ def summarize(rows):
     return result
 
 
+def reconcile_tokens(rows, runs):
+    rows = [dict(row) for row in rows]
+    corrections = []
+    indexed = {r['game_id']:r for r in runs}
+    if len(indexed) != len(runs):
+        raise ValueError('Multiple passes require pass-aware matching')
+    for row in rows:
+        run = indexed[row['game_id']]
+        total = sum(a['generated_tokens'] for a in run['history'])+run['final_generated_tokens']
+        if total != row['generated_tokens']:
+            corrections.append(dict(game_id=row['game_id'],reported_tokens=row['generated_tokens'],
+                                    reconstructed_tokens=total))
+            row['generated_tokens'] = total
+    return rows, corrections
+
+
 def analyze(directory):
     rows = json.loads((directory/'hydra_model_summary.json').read_text(encoding='utf-8'))
+    # TAAF's final_generated_tokens means only the final no-action turn, not
+    # total generation. Reconstruct v1 reporter totals from the raw benchmark.
+    benchmark = directory/'benchmark.json'
+    corrections = []
+    if benchmark.exists():
+        runs = json.loads(benchmark.read_text(encoding='utf-8'))['game_runs']
+        rows, corrections = reconcile_tokens(rows, runs)
     result = summarize(rows)
+    result['token_accounting_corrections'] = corrections
+    result['token_accounting_basis'] = 'Action-record generation plus terminal no-action generation; cancellation notes may include additional uncharged generation.'
     (directory/'analysis.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')
     return result
 

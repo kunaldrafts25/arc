@@ -139,3 +139,45 @@ An early persistence run started while the game cache was still populating, was 
   for comparisons. Submitted as 57630597, initially PENDING, no evaluation error.
   This used the available daily attempt. Hidden results must come from the
   official status API, independently of these public measurements.
+
+## TRANSFER-02 — official result and model-agent pivot
+
+- Official v0.2 submission 57630597: COMPLETE, score **0.02**, no evaluation
+  error. Its strong public FT09 gain barely transferred to hidden games.
+- Decision: reproduce a publicly released model-driven coding agent rather
+  than continuing to optimize only the public puzzle-specific mechanisms.
+- Source: Daniel Franzen's Apache-2.0 Milestone 2 release, crediting Jeroen
+  Cottaar and Tufa Labs. Source notebook SHA and original mounts are preserved
+  in `baselines/duck_m2`. Author reports 27.89; our hidden score is unmeasured.
+
+## MODEL-01 — completed real Kaggle preflight, 25 October 2026
+
+- Private notebook `kunalsinghh25/arc-hydra-duck-m2-baseline/1`: COMPLETE.
+  RTX PRO 6000, pinned model/drafter and offline Pennyroyal runtime verified.
+- Scope: five public games, one pass, 900-second rollout deadline. Server
+  readiness occurred about 20 minutes after launch, leaving only about six
+  minutes of model-ready gameplay in that rollout.
+- Results: seven completed levels, no full wins, 119 actions, subset mean
+  11.397576782. FT09 four levels; LS20/R11L/VC33 one each; BP35 zero.
+- Per-action plus terminal generation: 135,986 tokens. The first summary
+  incorrectly used terminal-turn tokens as totals. The auditor reconstructs
+  totals from raw `benchmark.json` and records corrections without modifying
+  the downloaded summary. Cancellation notes may include additional uncharged
+  generation. Regression test added.
+- Decision: runtime/gameplay preflight passed; proceed to all 25 games. This
+  subset mean is not comparable to the 25-game v0.2 mean or the hidden score.
+
+## MODEL-02 — full public model baseline, running
+
+- Notebook version 2: uploaded and official status RUNNING.
+- Agent/model/prompts/serving unchanged. One pass on all 25 public games, two
+  hours of gameplay after model readiness, one-hour startup allowance,
+  12,000-second notebook timeout. Upload hashes are in
+  `reports/kaggle/duck-m2-benchmark-v2/upload.json`.
+- Public wait now checks model health/process state before assigning gameplay
+  deadline. Competition behavior remains original for this reproduction.
+- Separate, unuploaded contest candidate adds an absolute notebook deadline
+  with a 600-second finalization reserve. It counts setup time and uses the
+  existing cancellation mechanism. It changes lifecycle budget only.
+- Local checks: 46 pass. Model-02 performance remains unmeasured until actual
+  run artifacts arrive; do not promote it from tests or RUNNING status alone.

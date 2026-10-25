@@ -30,7 +30,7 @@ evaluation settings and result verification are changed. Generated metadata
 retains all original offline inputs and the pinned container image, selects RTX
 PRO 6000, uses our private notebook ID and disables internet.
 
-The next prepared revision waits for model readiness before starting the public
+The public evaluation waits for model readiness before starting the public
 gameplay clock. It allows up to one hour from notebook initialization for model
 startup, checks the server process and health, and fails explicitly if startup
 cannot finish. This is public-only; competition startup behavior is unchanged.
@@ -38,9 +38,17 @@ Allow a 5,400-second notebook timeout for the preflight, or 12,000 seconds for
 the two-hour public benchmark. Do not replace a running notebook version merely
 because its model is still loading; inspect its terminal logs first.
 
+An optional `--contest-reserve-seconds 600` build adds a competition-only
+absolute deadline measured from notebook initialization, leaving ten minutes
+for cancellation and final outputs. This is a separate lifecycle intervention,
+not part of the original agent reproduction. Its prepared source is in
+`notebooks/duck_m2_candidate` and has not been uploaded.
+
 The author's write-up reports a 27.89 leaderboard score. Our reproduction is
-currently unscored. Do not treat local tests, an upload or a running job as proof
-of model startup, game completion or score reproduction.
+currently unscored on hidden games. A completed five-game public preflight
+verified model gameplay and seven level completions, with no full wins. The
+25-game public benchmark is running. Do not treat local tests, an upload or a
+running job as proof of model startup, game completion or score reproduction.
 
 References:
 
