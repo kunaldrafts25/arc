@@ -16,26 +16,31 @@ SOURCE_META = SOURCE.with_name('upstream-metadata.json')
 PREFIXES = ('ft09', 'ls20', 'r11l', 'vc33', 'bp35')
 
 
-def build(mode='preflight', contest_reserve_seconds=None, runtime_overlay_dataset=None, runtime_overlay_sha256=None, agent_variant='baseline', model_variant='intel'):
+def build(mode='preflight', contest_reserve_seconds=None, runtime_overlay_dataset=None, runtime_overlay_sha256=None, agent_variant='baseline', model_variant='intel', runtime_overlay_kernel=None):
+    if runtime_overlay_dataset and runtime_overlay_kernel:
+        raise ValueError('Select one runtime overlay source')
+    runtime_overlay_source=runtime_overlay_dataset or runtime_overlay_kernel
     if mode not in ('preflight', 'benchmark'):
         raise ValueError(mode)
     if agent_variant not in ('baseline','rolling-summary'):
         raise ValueError(agent_variant)
     if model_variant not in ('intel','swift-1.5'):
         raise ValueError(model_variant)
-    if model_variant!='intel' and (agent_variant!='baseline' or runtime_overlay_dataset is not None):
+    if model_variant!='intel' and (agent_variant!='baseline' or runtime_overlay_source is not None):
         raise ValueError('Evaluate the model change separately from memory/runtime first')
-    if agent_variant!='baseline' and runtime_overlay_dataset is not None:
+    if agent_variant!='baseline' and runtime_overlay_source is not None:
         raise ValueError('Evaluate memory and runtime changes separately first')
     if contest_reserve_seconds is not None and not 120 <= contest_reserve_seconds < 32400:
         raise ValueError('Contest finalization reserve must be between 120 and 32399 seconds')
-    if runtime_overlay_dataset is not None:
-        if not re.fullmatch(r'[A-Za-z0-9_-]+/[A-Za-z0-9_-]+',runtime_overlay_dataset):
+    if runtime_overlay_source is not None:
+        if runtime_overlay_dataset and not re.fullmatch(r'[A-Za-z0-9_-]+/[A-Za-z0-9_-]+',runtime_overlay_dataset):
             raise ValueError('Runtime overlay needs an owner/dataset reference')
+        if runtime_overlay_kernel and not re.fullmatch(r'[A-Za-z0-9_-]+/[A-Za-z0-9_-]+/[1-9][0-9]*',runtime_overlay_kernel):
+            raise ValueError('Runtime overlay needs an exact owner/kernel/version reference')
         if runtime_overlay_sha256 is None or not re.fullmatch(r'[a-f0-9]{64}',runtime_overlay_sha256):
             raise ValueError('Runtime overlay requires the actual manifest SHA-256')
     elif runtime_overlay_sha256 is not None:
-        raise ValueError('Manifest SHA requires a runtime overlay dataset')
+        raise ValueError('Manifest SHA requires a runtime overlay source')
     upstream = json.loads(SOURCE.read_text(encoding='utf-8'))
     notebook = deepcopy(upstream)
     code_digests = []
@@ -93,8 +98,9 @@ MODEL_DIR = hydra_swift_module['prepare'](hydra_swift_parts, '/tmp/hydra-swift-m
         provenance['competition_changes']='Periodic summaries and summary-aware context draining; original model, serving, tools and scheduler retained'
         if contest_reserve_seconds is not None:
             provenance['competition_changes']+=f'; {contest_reserve_seconds}-second finalization reserve'
-    if runtime_overlay_dataset is not None:
+    if runtime_overlay_source is not None:
         provenance.update(runtime_overlay_dataset=runtime_overlay_dataset,
+                          runtime_overlay_kernel=runtime_overlay_kernel,
                           runtime_overlay_manifest_sha256=runtime_overlay_sha256,
                           runtime_source_commit='560edbdca18aedae13f71ae20b3984efa4d22633')
         provenance['competition_changes'] = 'v3 serving overlay; original checkpoints, prompts, tools and agent settings retained'
@@ -105,10 +111,14 @@ MODEL_DIR = hydra_swift_module['prepare'](hydra_swift_parts, '/tmp/hydra-swift-m
         assert serving['source'].count(anchor)==1
         installer=(ROOT/'scripts/serving_v3/install_overlay.py').read_text(encoding='utf-8')
         hook='\n# ARC-Hydra: verified, offline serving overlay in a separate candidate.\n'
-        hook+=f'HYDRA_OVERLAY_DATASET = {runtime_overlay_dataset!r}\n'
-        hook+='hydra_overlay_options = [Path("/kaggle/input/datasets") / HYDRA_OVERLAY_DATASET, Path("/kaggle/input") / HYDRA_OVERLAY_DATASET.split("/")[1]]\n'
+        if runtime_overlay_kernel:
+            owner,slug,version=runtime_overlay_kernel.split('/')
+            hook+=f'hydra_overlay_options = [Path("/kaggle/input/notebooks/{owner}/{slug}/pennyroyal-v3-overlay"), Path("/kaggle/input/{slug}/pennyroyal-v3-overlay")]\n'
+        else:
+            hook+=f'HYDRA_OVERLAY_DATASET = {runtime_overlay_dataset!r}\n'
+            hook+='hydra_overlay_options = [Path("/kaggle/input/datasets") / HYDRA_OVERLAY_DATASET, Path("/kaggle/input") / HYDRA_OVERLAY_DATASET.split("/")[1]]\n'
         hook+='hydra_overlay = next((p for p in hydra_overlay_options if (p / "manifest.json").is_file()), None)\n'
-        hook+='if hydra_overlay is None:\n    raise RuntimeError("Runtime overlay dataset not mounted")\n'
+        hook+='if hydra_overlay is None:\n    raise RuntimeError("Runtime overlay source not mounted")\n'
         hook+=f'if sha256(hydra_overlay / "manifest.json") != {runtime_overlay_sha256!r}:\n    raise RuntimeError("Runtime overlay manifest differs from tested build")\n'
         hook+='hydra_installer = Path(PREFIX) / "install_v3_overlay.py"\n'
         hook+=f'hydra_installer.write_text({installer!r})\n'
@@ -163,7 +173,7 @@ if not TRUE_SUBMISSION:
     if not hydra_summary or any(r['state'] in ('crashed', 'not_started') or r['actions'] <= 0 for r in hydra_summary):
         raise RuntimeError('Model gameplay preflight failed; inspect benchmark.json and serve.log')
 '''
-    configuration_note=('Published serving configuration retained. ' if runtime_overlay_dataset is None else
+    configuration_note=('Published serving configuration retained. ' if runtime_overlay_source is None else
                         'Experimental v3 serving overlay; GPU correctness and performance unverified. ')
     configuration_note+=('Original competition time controls retained.' if contest_reserve_seconds is None else
                          f'Contest deadline includes startup and reserves {contest_reserve_seconds} seconds for finalization.')
@@ -186,8 +196,11 @@ if not TRUE_SUBMISSION:
     metadata.update(id='kunalsinghh25/arc-hydra-duck-m2-baseline',
                     title='ARC Hydra Duck M2 Baseline', code_file='submission.ipynb',
                     is_private=True, enable_internet=False, machine_shape='NvidiaRtxPro6000')
-    if runtime_overlay_dataset is not None:
-        metadata['dataset_sources'].append(runtime_overlay_dataset)
+    if runtime_overlay_source is not None:
+        if runtime_overlay_kernel:
+            metadata.setdefault('kernel_sources',[]).append(runtime_overlay_kernel)
+        else:
+            metadata['dataset_sources'].append(runtime_overlay_dataset)
         metadata['id']='kunalsinghh25/arc-hydra-duck-v3-runtime'
         metadata['title']='ARC Hydra Duck V3 Runtime'
     if agent_variant=='rolling-summary':
@@ -204,14 +217,15 @@ def main():
     parser.add_argument('--output')
     parser.add_argument('--contest-reserve-seconds',type=int)
     parser.add_argument('--runtime-overlay-dataset')
+    parser.add_argument('--runtime-overlay-kernel')
     parser.add_argument('--runtime-overlay-sha256')
     parser.add_argument('--agent-variant',choices=('baseline','rolling-summary'),default='baseline')
     parser.add_argument('--model-variant',choices=('intel','swift-1.5'),default='intel')
     args = parser.parse_args()
-    notebook, metadata, provenance = build(args.mode,args.contest_reserve_seconds,args.runtime_overlay_dataset,args.runtime_overlay_sha256,args.agent_variant,args.model_variant)
+    notebook, metadata, provenance = build(args.mode,args.contest_reserve_seconds,args.runtime_overlay_dataset,args.runtime_overlay_sha256,args.agent_variant,args.model_variant,args.runtime_overlay_kernel)
     output=args.output or ('notebooks/duck_swift' if args.model_variant=='swift-1.5' else
                           'notebooks/duck_summary' if args.agent_variant=='rolling-summary' else
-                          'notebooks/duck_v3_runtime' if args.runtime_overlay_dataset else 'notebooks/duck_m2')
+                          'notebooks/duck_v3_runtime' if (args.runtime_overlay_dataset or args.runtime_overlay_kernel) else 'notebooks/duck_m2')
     destination = (ROOT/output).resolve()
     if not destination.is_relative_to(ROOT):
         raise ValueError('Notebook output must stay inside the workspace')

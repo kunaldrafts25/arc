@@ -83,6 +83,9 @@ runtime wheel's `libcudart.so.13` and adds a host-link probe using the same
 CUDA library directories and `-lcudart -lcuda -lnvrtc` inputs as FlashInfer.
 The CPU probe links but does not execute GPU/driver calls.
 Current ref: `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/6`.
+This exact CPU job is COMPLETE: host-link probe, native build, accepted kernel
+checks, fresh offline reinstall, pip check and imports passed. Its manifest has
+36 files totaling 1,978,944,573 bytes. GPU inference remains unverified.
 The read-only observer extends the SDK reconnect allowance for quiet compilation;
 it never restarts the job. A returned observer is not proof of terminal status.
 
@@ -94,4 +97,15 @@ direct wheel uploads can alter filenames while leaving their contents unchanged.
 
 `install_overlay.py` and the optional runtime-overlay arguments of
 `build_duck_notebook.py` prepare a separate offline GPU candidate. They require
-the actual completed bundle manifest hash; no v3 GPU candidate has been launched.
+the actual completed bundle manifest hash. The builder also accepts
+`--runtime-overlay-kernel owner/slug/version` to mount a completed CPU job's
+output directly, with manifest verification before installation. This preserves
+wheel names without a local download/re-upload. Dataset and kernel sources are
+mutually exclusive; model and memory variants remain isolated.
+
+GPU preflight `kunalsinghh25/arc-hydra-duck-v3-runtime/1` is uploaded, using the
+exact completed CPU version 6 output and manifest SHA
+`f1b8e87b99402e8504491bb2d2d107df81b119295d4b919944986eacb2fef7fb`.
+It retains the original target/draft, tools, prompts and scheduling, and tests
+five public games for 900 seconds after readiness. Neither successful upload
+nor CPU completion establishes GPU inference or a score improvement.

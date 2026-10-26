@@ -6,16 +6,16 @@ reference, using eligible, reproducible offline code. Public development scores,
 accepted uploads and successful tests do not prove success. The goal remains
 active until official evidence meets it.
 
-## Latest checkpoint: 26 October, 18:47 IST
+## Latest checkpoint: 26 October, 23:41 IST
 
 User explicitly requested uploading the current best and checking results. The
 official allowance read returned one remaining entry. Submitted the exact
 completed original baseline version 2 as **57657435**. Its three source hashes
 match the saved upload manifest. Kaggle accepted it and reported zero remaining
-entries today. Official status rechecked at 18:47:07 IST: **PENDING**, scores
-empty, no error.
+entries today. Official status rechecked at 23:37:44 IST: **COMPLETE**, public
+score **24.87**, no error. This replaces the previous best official score 0.02.
 Selection evidence: `reports/kaggle/best-candidate-submission.json`. Keep the goal
-active; acceptance and the public development result do not prove >71.48.
+active; 24.87 is below 71.48.
 
 Both controlled GPU experiments are now COMPLETE and analyzed. Original public
 mean **43.7621**, 102 levels/five wins; rolling-summary **37.0547**, 89 levels/six
@@ -34,14 +34,23 @@ objects, then failed linking: `cannot find -lcudart`. Preserve its final log.
 Version 6 is uploaded: it provides the unversioned cudart linker alias for the
 versioned wheel library and adds a host link probe before the full native build.
 Python compilation, Bash syntax and both runtime-overlay tests passed locally.
-Cloud linker/build/offline checks remain unverified. Exact version and source
-hashes are recorded in `reports/kaggle/pennyroyal-v3-repair-v6/upload.json`.
-No v3 runtime has been promoted or GPU tested. The official submission uses the
-validated original runtime and model.
+The exact version is now COMPLETE. Its host-link probe, full native build,
+accepted FlashInfer checks, fresh offline reinstall and imports all passed.
+Completion marker and manifest are retained under the v6 report directory.
+The bundle contains 36 hashed files totaling 1,978,944,573 bytes.
+Exact source hashes are in `reports/kaggle/pennyroyal-v3-repair-v6/upload.json`.
+No v3 runtime has been promoted or GPU validated. The official submission uses
+the original runtime and model.
 
-Next: poll exact official submission **57657435**. It has a nine-hour evaluation
-budget, with possible queue time. Previous best scored entry remains 0.02 until
-the new official result is available. Do not submit again against today's limit.
+Next: observe `kunalsinghh25/arc-hydra-duck-v3-runtime/1`, a separate offline
+GPU preflight with five games/900 seconds after model readiness. It attaches
+the completed CPU builder's exact version 6 output directly, preserving wheel
+filenames and avoiding a 1.98 GB local download/re-upload. Manifest SHA is
+`f1b8e87b99402e8504491bb2d2d107df81b119295d4b919944986eacb2fef7fb`.
+Twelve packaging/runtime tests passed. Remaining free GPU quota is 70,361.28
+seconds (19.54 hours), paid scaling disabled. Do not submit another competition
+entry against today's limit. A successful preflight will need a full matched
+public comparison before runtime promotion.
 
 ## Earlier experiment checkpoints
 
