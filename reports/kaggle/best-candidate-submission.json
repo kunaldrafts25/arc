@@ -1,0 +1,14 @@
+{
+  "submission_ref": "57657435",
+  "kernel": "kunalsinghh25/arc-hydra-duck-m2-baseline/2",
+  "accepted_at": "2026-10-26T06:53:53.708885+00:00",
+  "reason": "Highest completed measured all-25-game public score among tested candidates",
+  "public_development_comparison": {
+    "original": 43.76212092097825,
+    "rolling_summary": 37.05473149762708,
+    "swift_15": 11.323005046546031
+  },
+  "selection": "Exact source hashes verified against original upload; no untested runtime or model change",
+  "allowance_after_submission": 0,
+  "boundary": "Accepted for official evaluation. Public development score is not a hidden competition score; goal above 71.48 remains unverified."
+}

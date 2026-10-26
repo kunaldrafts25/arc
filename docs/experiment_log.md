@@ -324,3 +324,29 @@ tolerance and an authoritative status read when it exits. Syntax and help
 checks passed. CPU v5 was re-polled RUNNING and observer session 17923 attached;
 `watcher.log` is now preferred. Both GPU versions and the CPU cloud job remain
 unchanged. No performance improvement or final build result is claimed.
+
+## 2026-10-26: completed comparisons and best-version official submission
+
+Both GPU experiments COMPLETE, all 25 games with verified model gameplay.
+Rolling summaries: mean 37.0547, 89 levels, six full wins, 3,545,214 accounted
+tokens. Swift: mean 11.3230, 50 levels, zero wins, 4,593,943 accounted tokens;
+its last half hour added no completed level. Original baseline remains the
+highest measured public mean at 43.7621, 102 levels and five wins. Keep original;
+neither variant demonstrated a better public score in this single-pass comparison.
+Summary execution and detailed failure mechanisms still need trace inspection.
+
+CPU v5 ERROR: headers passed and native objects compiled, but final linking
+could not find `-lcudart`. No successful runtime bundle or GPU result exists.
+Next repair should add the unversioned runtime-library alias and an actual host
+link probe. Preserve the terminal log; do not rerun the same defective build.
+
+User explicitly requested upload of the current best and result checking.
+Official allowance showed one entry remaining. Verified all three local source
+hashes against the original version-2 upload and its COMPLETE status. Submitted
+`kunalsinghh25/arc-hydra-duck-m2-baseline/2`: accepted as **57657435**, zero entries
+remaining today. Initial official check: PENDING, empty scores, no error, at
+12:23:53 IST. Public 43.76 is not the official competition score. Goal >71.48
+remains active. Selection record: `reports/kaggle/best-candidate-submission.json`.
+
+
+26 October continuation: official submission 57657435 remains PENDING at 18:47 IST, with no score/error. CPU repair v5 confirmed ERROR at final native link (-lcudart). Uploaded CPU-only repair v6 with CUDA runtime development alias and an early host-link probe; local Python/Bash checks and two runtime-overlay tests passed. Cloud build and offline installation remain unverified. Exact-source hashes: reports/kaggle/pennyroyal-v3-repair-v6/upload.json. Observer session 70362 follows that exact version. No second competition entry or GPU run was launched.

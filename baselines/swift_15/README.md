@@ -37,10 +37,12 @@ agent, prompts, tools and scheduling; no rolling summaries or v3 overlay. The
 notebook uses a distinct ID and default output directory. Upload hashes are in
 `reports/kaggle/duck-swift-v1/upload.json`.
 
-Input checks and the local model health check passed. Its public gameplay window
-ends 25 October 20:32:58 UTC / 26 October 02:02:58 IST. Readiness alone does not
-establish generated tokens, game quality or hidden score. Do not replace either
-running comparison version.
+The run is COMPLETE. All 25 games have verified model gameplay. Public mean
+score was **11.3230**, with 50 levels and zero full wins, compared with the
+original model's **43.7621**, 102 levels and five wins under the same public
+budget. Swift is not promoted. These single-pass measurements do not establish
+hidden competition scores or isolate the cause of the regression. Final metrics
+and analysis are in `reports/kaggle/duck-swift-v1/`.
 
 Swift's custom license and Qwen's base license apply separately from the
 Apache-2.0 agent. Their texts and notice are retained from parent revision

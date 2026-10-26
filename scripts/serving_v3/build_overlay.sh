@@ -156,6 +156,22 @@ __global__ void library_probe(float* x) { x[threadIdx.x] = 1.0f; }
 CUDA
 "$CUDACXX" -ccbin "$CXX" -arch=sm_120f -std=c++17 -cubin "$ROOT/library-probe.cu" -o "$ROOT/library-probe.cubin"
 echo 'CPU CUDA library-header compilation probe passed'
+# Exercise the same host-library search paths and linker inputs as FlashInfer.
+# Do not execute this binary: the CPU builder has no CUDA driver/device.
+cat > "$ROOT/link-probe.cpp" <<'CPP'
+#include <cuda_runtime_api.h>
+#include <cuda.h>
+#include <nvrtc.h>
+int main() {
+    int runtime_version=0, major=0, minor=0;
+    return int(cudaRuntimeGetVersion(&runtime_version))
+        + int(nvrtcVersion(&major, &minor)) + int(cuInit(0));
+}
+CPP
+"$CXX" "$ROOT/link-probe.cpp" -I"$CUDA_HOME/include" \
+  -L"$CUDA_HOME/lib64" -L"$CUDA_HOME/lib64/stubs" \
+  -Wl,-rpath-link,"$CUDA_HOME/lib64" -lcudart -lcuda -lnvrtc -o "$ROOT/link-probe"
+echo 'CPU CUDA host-link probe passed (not executed)'
 "$RUNTIME" "$ROOT/source/scripts/pennyroyal/flashinfer/install.py"
 "$RUNTIME" "$ROOT/source/scripts/pennyroyal/flashinfer/install.py" --check
 "$RUNTIME" "$SOURCE_FILES/package_overlay.py" package "$OUT" "$ROOT/base-packages.json"

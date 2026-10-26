@@ -37,6 +37,14 @@ for dist in sorted(md.distributions(),key=lambda d:d.metadata['Name']):
             dest.symlink_to(source)
 if not (root/'lib').is_symlink():
     (root/'lib').symlink_to('lib64')
+# CUDA runtime wheels ship the versioned SONAME but may omit the development
+# alias needed by the native build's -lcudart linker argument.
+cudart=root/'lib64/libcudart.so'
+if not cudart.exists() and not cudart.is_symlink():
+    versioned=root/'lib64/libcudart.so.13'
+    assert versioned.is_file(), 'Missing CUDA 13 runtime library'
+    cudart.symlink_to(versioned.name)
+assert cudart.is_file(), 'Broken CUDA runtime linker alias'
 for name in ('bin/nvcc','bin/ptxas','include/cuda.h','include/cuda_runtime.h',
              'include/crt/host_config.h','nvvm/libdevice/libdevice.10.bc'):
     assert (root/name).is_file(),name

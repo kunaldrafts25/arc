@@ -1,7 +1,7 @@
 # Pennyroyal v3 runtime experiment
 
 This is an isolated CPU build, not a validated replacement for the model agent.
-The running public baseline retains its original v2.5.3 runtime.
+The submitted baseline retains its original v2.5.3 runtime.
 
 Upstream release: `pennyroyal-v3.0.0`, commit
 `560edbdca18aedae13f71ae20b3984efa4d22633` in
@@ -74,21 +74,20 @@ Version 4 is ERROR: the library-extension filter also excluded NVRTC, leaving
 `nvrtc.h` unavailable. Version 5 excludes only the specific compiler packages,
 allows NVRTC and other library packages, and compiles a cuBLAS/NVRTC/CCCL header
 probe before the full FlashInfer build.
-Current ref: `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/5`.
-Observer session 29593 writes `reports/kaggle/pennyroyal-v3-repair-v5/live.log`.
-That observer subsequently expired; the exact cloud job remained RUNNING and
-observer 39736 now follows it. V5 live evidence confirms dependency checks and
-the cuBLAS/NVRTC/CCCL SM120f compilation probe passed. Full native compilation
-and fresh offline verification are still pending; see `header-probe.json` in
-the version-5 report directory.
-The current CPU observer is session 17923 using `scripts/kaggle_watch.py`; its
-preferred output is `reports/kaggle/pennyroyal-v3-repair-v5/watcher.log`. This
-read-only helper extends the SDK's five-failure reconnect allowance for quiet
-compilation, deduplicates replayed events through the SDK, and reports cloud
-status when observation ends. It never restarts the job.
+Version 5 is ERROR. It passed dependencies and the cuBLAS/NVRTC/CCCL probe,
+compiled all native objects, then failed the shared-library link with
+`cannot find -lcudart`. Its final log is retained in
+`reports/kaggle/pennyroyal-v3-repair-v5/v3-build.log`.
+Version 6 supplies the unversioned `libcudart.so` linker alias to the CUDA 13
+runtime wheel's `libcudart.so.13` and adds a host-link probe using the same
+CUDA library directories and `-lcudart -lcuda -lnvrtc` inputs as FlashInfer.
+The CPU probe links but does not execute GPU/driver calls.
+Current ref: `kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/6`.
+The read-only observer extends the SDK reconnect allowance for quiet compilation;
+it never restarts the job. A returned observer is not proof of terminal status.
 
 ```powershell
-.venv/Scripts/python.exe scripts/kaggle_watch.py kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/5 --output reports/kaggle/pennyroyal-v3-repair-v5/watcher.log
+.venv/Scripts/python.exe scripts/kaggle_watch.py kunalsinghh25/arc-hydra-pennyroyal-v3-dependency-repair/6 --output reports/kaggle/pennyroyal-v3-repair-v6/watcher.log
 ```
 Preserve original wheel paths in an archive when packaging the final overlay;
 direct wheel uploads can alter filenames while leaving their contents unchanged.
