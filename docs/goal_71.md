@@ -71,6 +71,15 @@ Observer session 57352 follows its exact version. Verify the actual system
 prompt contains the addendum before interpreting its result. Experiment design
 and upload hashes are in `reports/kaggle/duck-verification-v1/`.
 
+At 23:54 IST, verification/1 has launched its original SGLang server (pid 501),
+identified its 38-shard target and two-shard draft view, and started checkpoint
+precaching. Health/model gameplay and actual guidance activation are pending.
+Runtime/1 remains RUNNING; its log-stream endpoint returned HTTP 500 while
+authoritative status remained live. Observer 64896 now retries transient
+500/502/503/504, connection and timeout failures against that same version.
+Six observer tests passed, including no retries of permission errors, no job
+mutations, and no terminal-state claim after observation retry exhaustion.
+
 ## Earlier experiment checkpoints
 
 Previous turn made progress by correcting audit classification and verified both

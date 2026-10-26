@@ -4,8 +4,45 @@ from contextlib import redirect_stderr, redirect_stdout
 import os
 from pathlib import Path
 import re
+import time
+
+from requests.exceptions import ConnectionError, HTTPError, Timeout
 
 ROOT=Path(__file__).resolve().parents[1]
+
+
+def retryable(exc):
+    return isinstance(exc,(ConnectionError,Timeout)) or (
+        isinstance(exc,HTTPError) and exc.response is not None
+        and exc.response.status_code in (500,502,503,504)
+    )
+
+
+def observe(api,kernel,attempts=30,delay=15,sleep=time.sleep):
+    """Retry only observation; never infer cloud termination from stream failure."""
+    for attempt in range(attempts):
+        try:
+            api.kernels_logs_cli(kernel,follow=True)
+        except (HTTPError,ConnectionError,Timeout) as exc:
+            if not retryable(exc):
+                raise
+            print('Transient log-stream error:',type(exc).__name__,flush=True)
+        try:
+            status=api.kernels_status(kernel).status
+        except (HTTPError,ConnectionError,Timeout) as exc:
+            if not retryable(exc):
+                raise
+            print('Cloud status temporarily unavailable:',type(exc).__name__,flush=True)
+        else:
+            print('Authoritative cloud status:',status,flush=True)
+            if status.name in ('COMPLETE','ERROR','CANCEL_ACKNOWLEDGED'):
+                return status
+            if status.name not in ('QUEUED','RUNNING','NEW_SCRIPT','CANCEL_REQUESTED'):
+                raise RuntimeError(f'Unrecognized cloud status: {status}')
+        if attempt+1<attempts:
+            print('Reconnecting observation to the same exact version in',delay,'seconds',flush=True)
+            sleep(delay)
+    raise RuntimeError('Observation retry limit reached; cloud termination unproven. Recheck the same version.')
 
 
 def main():
@@ -35,7 +72,7 @@ def main():
     with output.open('w',encoding='utf-16') as stream, redirect_stdout(stream), redirect_stderr(stream):
         print('Observing exact version:',args.kernel,flush=True)
         try:
-            api.kernels_logs_cli(args.kernel,follow=True)
+            observe(api,args.kernel)
         finally:
             # A returned/failed observer is not a terminal cloud-job result.
             try:
