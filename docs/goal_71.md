@@ -52,6 +52,15 @@ seconds (19.54 hours), paid scaling disabled. Do not submit another competition
 entry against today's limit. A successful preflight will need a full matched
 public comparison before runtime promotion.
 
+At 23:46 IST the exact GPU preflight remains RUNNING, with no execution log
+events exposed yet. Two read-only log observers returned while authoritative
+status still said RUNNING; these are not cloud failures and do not justify a
+restart. Static wheel inspection found matching flag strings or annotated
+fields for every launcher server argument. The wheel does not contain the
+original runtime's custom sparse-prefill/MRU cache markers; upstream mechanisms
+may differ. Do not assume v3 improves this INT4 agent's throughput. Evidence:
+`reports/kaggle/duck-v3-runtime-v1/static-compatibility.json`.
+
 ## Earlier experiment checkpoints
 
 Previous turn made progress by correcting audit classification and verified both
