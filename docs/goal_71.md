@@ -6,7 +6,7 @@ reference, using eligible, reproducible offline code. Public development scores,
 accepted uploads and successful tests do not prove success. The goal remains
 active until official evidence meets it.
 
-## Latest checkpoint: 26 October, 23:50 IST
+## Latest checkpoint: 27 October, 00:04 IST
 
 User explicitly requested uploading the current best and checking results. The
 official allowance read returned one remaining entry. Submitted the exact
@@ -79,6 +79,17 @@ authoritative status remained live. Observer 64896 now retries transient
 500/502/503/504, connection and timeout failures against that same version.
 Six observer tests passed, including no retries of permission errors, no job
 mutations, and no terminal-state claim after observation retry exhaustion.
+
+Verification/1 subsequently passed its initial 720-second launcher wait with
+the server still loading, then entered the independent 3600-second readiness
+allowance. Its checkpoint prefetch read 62 files / 185.40 GB in 690.91 seconds.
+This is startup progress, not model health or gameplay evidence.
+CPU-only `kunalsinghh25/arc-hydra-runtime-input-probe/1` is uploaded with only
+the completed builder/6 kernel input. It verifies the same mount paths, exact
+manifest and all bundle hashes; no model, competition, network or GPU required.
+This checks input integration independently while the runtime job's log endpoint
+returns server errors. Observer 87895 follows the probe. Neither GPU job was
+restarted. Actual CPU probe result remains pending.
 
 ## Earlier experiment checkpoints
 
