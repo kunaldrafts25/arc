@@ -23,6 +23,12 @@ wins; Swift **11.3230**, 50 levels/zero wins. All 25 games in both variants have
 verified model gameplay. Neither variant is promoted. These are single-pass
 public comparisons, not estimates of hidden scores or causal proofs.
 
+Follow-up BP35 trace audit verifies five retained summaries, so the summary
+feature did execute. That game improved from one to two levels, while the
+25-game aggregate regressed. Summary calls sit outside the gameplay request
+logger; their direct usage/timing cannot be inferred from its response totals.
+See `reports/kaggle/duck-summary-v1/findings.md` and the hashed trace audit.
+
 CPU repair v5 is officially ERROR. It passed headers and compiled the native
 objects, then failed linking: `cannot find -lcudart`. Preserve its final log.
 Version 6 is uploaded: it provides the unversioned cudart linker alias for the
