@@ -22,7 +22,7 @@ def build(mode='preflight', contest_reserve_seconds=None, runtime_overlay_datase
     runtime_overlay_source=runtime_overlay_dataset or runtime_overlay_kernel
     if mode not in ('preflight', 'benchmark'):
         raise ValueError(mode)
-    if agent_variant not in ('baseline','rolling-summary'):
+    if agent_variant not in ('baseline','rolling-summary','step-verification'):
         raise ValueError(agent_variant)
     if model_variant not in ('intel','swift-1.5'):
         raise ValueError(model_variant)
@@ -96,6 +96,17 @@ MODEL_DIR = hydra_swift_module['prepare'](hydra_swift_parts, '/tmp/hydra-swift-m
             '# ARC-Hydra rolling-summary experiment.\nsetup_env.update('+repr(overrides)+')\n'+anchor)
         provenance.update(agent_variant=agent_variant,agent_environment_overrides=overrides)
         provenance['competition_changes']='Periodic summaries and summary-aware context draining; original model, serving, tools and scheduler retained'
+        if contest_reserve_seconds is not None:
+            provenance['competition_changes']+=f'; {contest_reserve_seconds}-second finalization reserve'
+    if agent_variant=='step-verification':
+        overrides=dict(ARC3_STEP_VERIFICATION_HINT='1')
+        configuration=next(c for c in notebook['cells'] if '\nos.environ.update({k: str(v) for k,v in setup_env.items()})' in c['source'])
+        anchor='os.environ.update({k: str(v) for k,v in setup_env.items()})'
+        assert configuration['source'].count(anchor)==1
+        configuration['source']=configuration['source'].replace(anchor,
+            '# ARC-Hydra step-verification experiment.\nsetup_env.update('+repr(overrides)+')\n'+anchor)
+        provenance.update(agent_variant=agent_variant,agent_environment_overrides=overrides)
+        provenance['competition_changes']='Existing step-verification prompt guidance enabled; original model, runtime, tools, memory and scheduler retained'
         if contest_reserve_seconds is not None:
             provenance['competition_changes']+=f'; {contest_reserve_seconds}-second finalization reserve'
     if runtime_overlay_source is not None:
@@ -179,6 +190,8 @@ if not TRUE_SUBMISSION:
                          f'Contest deadline includes startup and reserves {contest_reserve_seconds} seconds for finalization.')
     if agent_variant=='rolling-summary':
         configuration_note+=' Experimental periodic summaries with summary-aware history draining; benefit unproven.'
+    if agent_variant=='step-verification':
+        configuration_note+=' Experimental existing step-verification prompt guidance; benefit unproven.'
     if model_variant=='swift-1.5':
         configuration_note+=' Swift 1.5 target-model experiment; model/gameplay compatibility and benefit unverified.'
     notebook['cells'].insert(0, dict(cell_type='markdown', metadata={}, source=(
@@ -205,6 +218,8 @@ if not TRUE_SUBMISSION:
         metadata['title']='ARC Hydra Duck V3 Runtime'
     if agent_variant=='rolling-summary':
         metadata.update(id='kunalsinghh25/arc-hydra-duck-summary',title='ARC Hydra Duck Summary')
+    if agent_variant=='step-verification':
+        metadata.update(id='kunalsinghh25/arc-hydra-duck-verification',title='ARC Hydra Duck Verification')
     if model_variant=='swift-1.5':
         metadata.update(id='kunalsinghh25/arc-hydra-duck-swift',title='ARC Hydra Duck Swift')
         metadata['model_sources']=[m for m in metadata['model_sources'] if 'intel-qwen' not in m]+manifest['model_sources']
@@ -219,12 +234,13 @@ def main():
     parser.add_argument('--runtime-overlay-dataset')
     parser.add_argument('--runtime-overlay-kernel')
     parser.add_argument('--runtime-overlay-sha256')
-    parser.add_argument('--agent-variant',choices=('baseline','rolling-summary'),default='baseline')
+    parser.add_argument('--agent-variant',choices=('baseline','rolling-summary','step-verification'),default='baseline')
     parser.add_argument('--model-variant',choices=('intel','swift-1.5'),default='intel')
     args = parser.parse_args()
     notebook, metadata, provenance = build(args.mode,args.contest_reserve_seconds,args.runtime_overlay_dataset,args.runtime_overlay_sha256,args.agent_variant,args.model_variant,args.runtime_overlay_kernel)
     output=args.output or ('notebooks/duck_swift' if args.model_variant=='swift-1.5' else
                           'notebooks/duck_summary' if args.agent_variant=='rolling-summary' else
+                          'notebooks/duck_verification' if args.agent_variant=='step-verification' else
                           'notebooks/duck_v3_runtime' if (args.runtime_overlay_dataset or args.runtime_overlay_kernel) else 'notebooks/duck_m2')
     destination = (ROOT/output).resolve()
     if not destination.is_relative_to(ROOT):

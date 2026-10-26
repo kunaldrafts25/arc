@@ -6,7 +6,7 @@ reference, using eligible, reproducible offline code. Public development scores,
 accepted uploads and successful tests do not prove success. The goal remains
 active until official evidence meets it.
 
-## Latest checkpoint: 26 October, 23:41 IST
+## Latest checkpoint: 26 October, 23:50 IST
 
 User explicitly requested uploading the current best and checking results. The
 official allowance read returned one remaining entry. Submitted the exact
@@ -60,6 +60,16 @@ fields for every launcher server argument. The wheel does not contain the
 original runtime's custom sparse-prefill/MRU cache markers; upstream mechanisms
 may differ. Do not assume v3 improves this INT4 agent's throughput. Evidence:
 `reports/kaggle/duck-v3-runtime-v1/static-compatibility.json`.
+
+New independent quality experiment: `kunalsinghh25/arc-hydra-duck-verification/1`
+is RUNNING. It enables only existing `ARC3_STEP_VERIFICATION_HINT=1`, retaining
+the original runtime/model/draft/tools/memory/scheduler, all 25 public games and
+the matched 7,200-second post-readiness budget. No v3 overlay or summaries.
+Motivation: observed repeated mechanics reconstruction in baseline SK48; no
+claim that reasoning without actions is waste. Thirteen packaging tests passed.
+Observer session 57352 follows its exact version. Verify the actual system
+prompt contains the addendum before interpreting its result. Experiment design
+and upload hashes are in `reports/kaggle/duck-verification-v1/`.
 
 ## Earlier experiment checkpoints
 

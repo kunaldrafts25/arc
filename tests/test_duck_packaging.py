@@ -115,3 +115,22 @@ def test_summary_experiment_changes_only_agent_environment_before_it_is_exported
     assert metadata['model_sources']==base_meta['model_sources']
     assert metadata['dataset_sources']==base_meta['dataset_sources']
     assert metadata['enable_internet'] is False
+
+
+def test_verification_experiment_is_a_single_prompt_option_with_matched_serving():
+    baseline,base_meta,_=build('benchmark')
+    variant,metadata,provenance=build('benchmark',agent_variant='step-verification')
+    def behavior(source):
+        return '\n'.join(line for line in source.splitlines() if 'Path(WORKING_DIR / "hydra_provenance.json").write_text' not in line)
+    differences=[b['source'] for a,b in zip(baseline['cells'],variant['cells'])
+                 if a['cell_type']=='code' and behavior(a['source'])!=behavior(b['source'])]
+    assert len(differences)==1
+    hook=differences[0].split('# ARC-Hydra step-verification experiment.\n',1)[1]
+    environment={}
+    exec(hook,dict(setup_env={},os=SimpleNamespace(environ=environment)))
+    assert environment=={'ARC3_STEP_VERIFICATION_HINT':'1'}
+    assert provenance['agent_environment_overrides']==environment
+    assert provenance['public_runtime_seconds']==7200
+    assert metadata['id']=='kunalsinghh25/arc-hydra-duck-verification'
+    for field in ('model_sources','dataset_sources','kernel_sources','enable_internet'):
+        assert metadata[field]==base_meta[field]
