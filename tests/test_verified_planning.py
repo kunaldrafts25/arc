@@ -22,7 +22,7 @@ def transition(before, after, action='RIGHT', **result):
     return SimpleNamespace(before_frame=before,after_frame=after,action=action,result=result)
 
 
-def setup(outcomes=None,terminal=False):
+def setup(outcomes=None,terminal=False,enforce_probes=True):
     before, current=frame(0),frame(1,1)
     namespace=dict(current_frame=current,transitions=[transition(before,current)])
     spent=[]
@@ -39,12 +39,38 @@ def setup(outcomes=None,terminal=False):
             actions=[actions]
         return [dict(action=a) if isinstance(a,str) else dict(a) for a in actions]
     namespace['action']=raw
-    install(namespace,normalize)
+    install(namespace,normalize,enforce_probes=enforce_probes)
     return namespace, spent
 
 
 def increment(state, action):
     return [[state[0][0]+1]]
+
+
+def test_optional_mode_preserves_raw_batches_repeated_calls_and_result():
+    calls=[]
+    result=dict(executed=True,executed_count=2,host_guard='preserved')
+    def raw(commands):
+        calls.append(commands)
+        return result
+    namespace=dict(action=raw)
+    events=install(namespace,lambda actions:actions,enforce_probes=False)
+    batch=[dict(action='RIGHT'),dict(action='LEFT')]
+    assert namespace['action'](batch) is result
+    assert namespace['action'](batch) is result
+    assert calls==[batch,batch]
+    assert not events  # Ordinary actions are accounted by the original host.
+
+
+def test_optional_mode_still_checks_plans_and_blocks_impure_models():
+    api,spent=setup({1:7},enforce_probes=False)
+    report=api['execute_plan'](['RIGHT']*2,increment)
+    assert report['stop_reason']=='prediction_mismatch' and len(spent)==1
+    def impure(state,command):
+        api['action']('RIGHT')
+        return [[0]]
+    assert 'cannot spend' in api['verify_model'](impure)['error']
+    assert len(spent)==1
 
 
 def test_correct_model_replays_history_and_checks_each_real_step():

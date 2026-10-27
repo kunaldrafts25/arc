@@ -38,6 +38,16 @@ Python objects; the existing sandbox permissions are retained.
 
 ## Integration and diagnostics
 
+The current optional variant is `planning-assist`. It preserves original ordinary
+action batches/repeated calls and host results/guards; callbacks still cannot
+spend actions, and checked plans retain replay and prospective validation.
+Its guidance does not require a simulator to play. Ordinary action accounting
+comes from the original benchmark, not helper events. This revision follows the
+completed 25-game result of 45.0150 baseline versus 33.1771 strict planner;
+causes are not isolated by that single stochastic pair. CPU probe v5 passed
+eight sandbox cases and 16 user-prompt combinations for optional mode. The
+Ultimate Candidate tests that revision with the same model/runtime/scheduler.
+
 The installer patches the notebook-local writable source copy before unpickling
 the solver. It validates expected source anchors and compiles both modified files
 before writing. Source hashes are retained in `hydra_extension.json`. The old

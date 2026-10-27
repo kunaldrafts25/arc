@@ -42,7 +42,7 @@ def _historical_action(text):
     raise ValueError('Unrecognized historical action: '+text[:100])
 
 
-def install(namespace, normalize):
+def install(namespace, normalize, enforce_probes=True):
     """Expose helpers in a single tool call; host history remains authoritative."""
     raw_action=namespace['action']
     checking=[False]
@@ -128,6 +128,10 @@ def install(namespace, normalize):
         if checking[0]:
             raise RuntimeError('Prediction and encoding functions cannot spend real actions')
         commands=normalize(actions)
+        if not enforce_probes:
+            # Preserve the original host's batching and guards. Prediction
+            # callbacks still cannot spend actions, and execute_plan is checked.
+            return raw_action(commands)
         if len(commands)!=1 or probes[0]>=1:
             raise RuntimeError('One exploratory action per tool call. Use execute_plan(actions, predict, encode=None) for checked batches.')
         probes[0]+=1

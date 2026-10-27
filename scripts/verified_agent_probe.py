@@ -8,7 +8,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 
-def check_user_prompts(agent_source):
+def check_user_prompts(agent_source,enforce_probes=True):
     """Render the real per-turn method across memory/batching/opener branches."""
     from inference.agent import prompts
     methods=[node for node in ast.walk(ast.parse(agent_source))
@@ -30,6 +30,12 @@ def check_user_prompts(agent_source):
                          _dedupe_multicall_line=lambda:dedupe,
                          _opener_commit_hint=lambda:opener)
         text=namespace['_build_user_prompt'](instance,int(action_num),valid_actions=['MOUSE'])
+        if not enforce_probes:
+            assert 'prefer batching it in one call' in text
+            assert 'more than once in one Python snippet' in text
+            assert 'ordinary action batching remains available' in text
+            rendered.append(text)
+            continue
         for forbidden in ('more than once in one Python snippet','prefer batching it',
                           'otherwise batch the route','best valid action or ordered batch'):
             assert forbidden not in text, (forbidden,memory_off,dedupe,opener,action_num)
@@ -39,7 +45,7 @@ def check_user_prompts(agent_source):
     return rendered
 
 
-def check_prompt(agent_source):
+def check_prompt(agent_source,enforce_probes=True):
     from inference.agent import prompts
     function=next(n for n in ast.parse(agent_source).body if isinstance(n,ast.FunctionDef) and n.name=='_build_system_prompt')
     namespace=dict(vars(prompts))
@@ -50,6 +56,12 @@ def check_prompt(agent_source):
         _prefer_tool_calls=false,_level_transfer_guidance_enabled=false)
     exec(compile(ast.Module(body=[function],type_ignores=[]),'installed-prompt','exec'),namespace)
     prompt=namespace['_build_system_prompt'](tool_output_tokens=3072)
+    if not enforce_probes:
+        assert 'Optional prediction-checking tools:' in prompt
+        assert 'Ordinary action(...) retains its original batching' in prompt
+        assert 'Unverified batches and repeated exploratory actions in the same call are refused' not in prompt
+        check_user_prompts(agent_source,enforce_probes=False)
+        return prompt
     assert 'You can also call `action(...)` multiple times' not in prompt
     assert 'Call `action(actions)` to execute one or more' not in prompt
     assert 'execute_plan(actions, predict' in prompt
@@ -58,7 +70,7 @@ def check_prompt(agent_source):
     return prompt
 
 
-def run_probe():
+def run_probe(enforce_probes=True):
     from inference.agent.python_tool_sandbox import run_sandboxed_python
 
     increment="def predict(state, action):\n    return [[state[0][0]+1]]\n"
@@ -71,6 +83,9 @@ def run_probe():
         dict(name='impure_prediction',code="def predict(state,action_dict):\n    action('RIGHT')\n    return [[1]]\nresult=execute_plan(['RIGHT'],predict)",spent=0,reason='unverified_model'),
         dict(name='one_exploratory_action',code="action('RIGHT')\naction('RIGHT')",spent=1,error=True),
     ]
+    if not enforce_probes:
+        cases[-1]=dict(name='ordinary_repeated_actions_preserved',code="action('RIGHT')\naction('RIGHT')",spent=2,ordinary=True)
+        cases.append(dict(name='ordinary_batch_preserved',code="action(['RIGHT','RIGHT'])",spent=2,ordinary=True))
     reports=[]
     for case in cases:
         value=1
@@ -82,26 +97,32 @@ def run_probe():
             return dict(current_frame=view(value),history=list(history) if not case.get('empty') else [],valid_actions=['RIGHT'])
         def handler(actions,**kwargs):
             nonlocal value
-            assert len(actions)==1
+            if enforce_probes:
+                assert len(actions)==1
             calls.extend(actions)
-            value=7 if case.get('surprise') else value+1
-            history.append(dict(action='RIGHT',frame=view(value)))
+            for command in actions:
+                value=7 if case.get('surprise') else value+1
+                history.append(dict(action='RIGHT',frame=view(value)))
             return dict(action_result=dict(executed=True,gameplay_changed=True),state=state())
         result=run_sandboxed_python(code=case['code'],timeout_seconds=5,
             initial_state=state(),action_handler=handler)
         assert len(calls)==case['spent'],(case['name'],result,calls)
         if case.get('error'):
             assert 'One exploratory' in result['error'],result
-        else:
+        elif not case.get('ordinary'):
             assert not result['error'],result
             assert result['result']['stop_reason']==case['reason'],result
+        else:
+            assert not result['error'],result
         events=result.get('hydra_verified_events')
-        assert events,(case['name'],'missing mechanical event propagation')
+        if not case.get('ordinary'):
+            assert events,(case['name'],'missing mechanical event propagation')
         reports.append(dict(name=case['name'],passed=True,actual_actions=len(calls),events=events))
     from inference.agent import python_tool_sandbox
     agent_file=Path(python_tool_sandbox.__file__).with_name('tool_agent.py')
-    check_prompt(agent_file.read_text(encoding='utf-8'))
+    check_prompt(agent_file.read_text(encoding='utf-8'),enforce_probes=enforce_probes)
     output=dict(passed=True,cases=reports,prompt_contract_consistent=True,
+        enforce_probes=enforce_probes,
         prompt_contract_scope='System prompt plus 16 rendered user-prompt combinations: memory on/off, duplicate guidance on/off, opener hint on/off, initial/resumed turn. Not exhaustive configuration coverage.',
         boundary='Synthetic CPU integration checks of installed sandbox and prompt contract; no model inference, gateway or ARC gameplay tested')
     Path('/kaggle/working/verified-probe.json').write_text(json.dumps(output,indent=2)+'\n')

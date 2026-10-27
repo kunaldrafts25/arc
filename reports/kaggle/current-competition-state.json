@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-27T17:49:02.569116+00:00",
+  "checked_at": "2026-10-27T18:07:25.301994+00:00",
   "competition": "arc-prize-2026-arc-agi-3",
   "leaderboard_url": "https://www.kaggle.com/competitions/arc-prize-2026-arc-agi-3/leaderboard",
   "leaderboard_rows": [
@@ -1211,9 +1211,9 @@
     "limited_by_total": false
   },
   "quota": {
-    "gpu_used_seconds": 65714.363528,
+    "gpu_used_seconds": 66962.601,
     "gpu_allowed_seconds": 108000.0,
-    "gpu_reserved_seconds": 35779.771236,
+    "gpu_reserved_seconds": 0.0,
     "pay_to_scale_enabled": false,
     "refresh_time": "2026-10-31T00:00:00"
   },
@@ -1236,25 +1236,7 @@
     }
   ],
   "jobs": {
-    "kunalsinghh25/arc-hydra-duck-m2-baseline/3": "RUNNING",
-    "kunalsinghh25/arc-hydra-verified-planner/2": "RUNNING"
-  },
-  "verified_submissions": [
-    {
-      "ref": "57657435",
-      "status": "COMPLETE",
-      "public_score": "24.87",
-      "private_score": "",
-      "error": "",
-      "checked_at": "2026-10-27T17:51:23.115258+00:00"
-    },
-    {
-      "ref": "57686595",
-      "status": "COMPLETE",
-      "public_score": "0.00",
-      "private_score": "",
-      "error": "",
-      "checked_at": "2026-10-27T17:51:24.442111+00:00"
-    }
-  ]
+    "kunalsinghh25/arc-hydra-duck-m2-baseline/3": "COMPLETE",
+    "kunalsinghh25/arc-hydra-verified-planner/2": "COMPLETE"
+  }
 }

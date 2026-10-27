@@ -22,9 +22,10 @@ def build(mode='preflight', contest_reserve_seconds=None, runtime_overlay_datase
     runtime_overlay_source=runtime_overlay_dataset or runtime_overlay_kernel
     if mode not in ('preflight', 'benchmark'):
         raise ValueError(mode)
-    if agent_variant not in ('baseline','rolling-summary','step-verification','verified-planning'):
+    if agent_variant not in ('baseline','rolling-summary','step-verification','verified-planning','planning-assist'):
         raise ValueError(agent_variant)
-    if agent_variant=='verified-planning' and contest_reserve_seconds is None:
+    planning=agent_variant in ('verified-planning','planning-assist')
+    if planning and contest_reserve_seconds is None:
         contest_reserve_seconds=600
     if model_variant not in ('intel','swift-1.5'):
         raise ValueError(model_variant)
@@ -111,18 +112,20 @@ MODEL_DIR = hydra_swift_module['prepare'](hydra_swift_parts, '/tmp/hydra-swift-m
         provenance['competition_changes']='Existing step-verification prompt guidance enabled; original model, runtime, tools, memory and scheduler retained'
         if contest_reserve_seconds is not None:
             provenance['competition_changes']+=f'; {contest_reserve_seconds}-second finalization reserve'
-    if agent_variant=='verified-planning':
+    if planning:
         library=(ROOT/'hydra/verified_planning.py').read_text(encoding='utf-8')
         installer=(ROOT/'scripts/install_verified_agent.py').read_text(encoding='utf-8')
         setup=next(c for c in notebook['cells'] if c['source'].startswith('# Each bundled repo exposes'))
         setup['source']+='\n# ARC-Hydra: install into the writable notebook-local source copy before pickle imports.\n'
         setup['source']+=f'_hydra_extension_ns = {{}}\nexec({installer!r}, _hydra_extension_ns)\n'
-        setup['source']+=f'_hydra_extension_report = _hydra_extension_ns["install"](BUNDLE_DIR, {library!r})\n'
+        setup['source']+=f'_hydra_extension_report = _hydra_extension_ns["install"](BUNDLE_DIR, {library!r}, enforce_probes={agent_variant=="verified-planning"!r})\n'
         setup['source']+='(WORKING_DIR / "hydra_extension.json").write_text(json.dumps(_hydra_extension_report, indent=2))\n'
         provenance.update(agent_variant=agent_variant,verified_planning_sha256=sha256(library.encode()).hexdigest(),
                           extension_installer_sha256=sha256(installer.encode()).hexdigest())
         provenance['public_competition_diagnostics']=(mode=='preflight')
         provenance['competition_changes']='Mechanically checked replay/planned actions, one exploratory action per tool call; shared model readiness, lifecycle counters and global finalization reserve. Original model/runtime/scheduler retained.'
+        if agent_variant=='planning-assist':
+            provenance['competition_changes']='Optional mechanically checked planning; original ordinary action batching and host guards retained. Shared readiness, lifecycle counters and global finalization reserve. Original model/runtime/scheduler retained.'
     if runtime_overlay_source is not None:
         provenance.update(runtime_overlay_dataset=runtime_overlay_dataset,
                           runtime_overlay_kernel=runtime_overlay_kernel,
@@ -159,14 +162,14 @@ MODEL_DIR = hydra_swift_module['prepare'](hydra_swift_parts, '/tmp/hydra-swift-m
     controls['source'] += 'if not TRUE_SUBMISSION:\n    bm.n_passes = 1\n'
     controls['source'] += f'    bm.solver.max_runtime_s_per_game = {provenance["public_runtime_seconds"]}\n'
     controls['source'] += '    bm.solver.save_request_logs = True\n    bm.periodic_save_interval_s = 120\n'
-    if agent_variant=='verified-planning':
+    if planning:
         controls['source']+='\n# Lightweight progress is also retained during competition reruns.\nbm.periodic_save_interval_s = 120\n'
     run = next(c for c in notebook['cells'] if c['source'].startswith("print('Starting benchmark...')"))
     needle = 'await bm.run(soft_end_time=soft_end, runtime_environment=target, minimal_diagnostics=TRUE_SUBMISSION)'
     assert run['source'].count(needle) == 1
     evaluation = '\n# ARC-Hydra public reproduction; no hidden game selection.\nif not TRUE_SUBMISSION:\n'
     wait_source = (ROOT/'scripts/wait_local_backend.py').read_text(encoding='utf-8')
-    if agent_variant!='verified-planning':
+    if not planning:
         evaluation += f'    exec({wait_source!r})\n'
         evaluation += '    wait_local_backend(f"http://127.0.0.1:{SERVED_MODEL_PORT}/health", NOTEBOOK_START_TIME + 3600, proc)\n'
     if mode == 'preflight':
@@ -184,7 +187,7 @@ MODEL_DIR = hydra_swift_module['prepare'](hydra_swift_parts, '/tmp/hydra-swift-m
         evaluation += f'    soft_end = datetime.fromtimestamp(NOTEBOOK_START_TIME + hydra_notebook_budget - {contest_reserve_seconds})\n'
         evaluation += '    print("Competition soft deadline:", soft_end.isoformat(), "including notebook startup")\n'
     run['source'] = run['source'].replace(needle, evaluation+'\n'+needle)
-    if agent_variant=='verified-planning':
+    if planning:
         lifecycle=(ROOT/'scripts/agent_lifecycle.py').read_text(encoding='utf-8')
         prelude='\n# ARC-Hydra shared readiness and durable lifecycle evidence.\n'
         prelude+=f'exec({lifecycle!r})\nexec({wait_source!r})\n'
@@ -198,6 +201,7 @@ except BaseException as _hydra_start_error:
     raise
 write_lifecycle(_hydra_lifecycle_path, 'model_ready', _hydra_context)
 '''
+        prelude=prelude.replace("variant='verified-planning'",f'variant={agent_variant!r}')
         run['source']=run['source'].replace("print('Starting benchmark...')","print('Starting benchmark...')"+prelude,1)
         executed_await=needle
         if mode=='preflight':
@@ -273,6 +277,8 @@ if not TRUE_SUBMISSION:
         metadata.update(id='kunalsinghh25/arc-hydra-duck-verification',title='ARC Hydra Duck Verification')
     if agent_variant=='verified-planning':
         metadata.update(id='kunalsinghh25/arc-hydra-verified-planner',title='ARC Hydra Verified Planner')
+    if agent_variant=='planning-assist':
+        metadata.update(id='kunalsinghh25/arc-hydra-planning-assist',title='ARC Hydra Planning Assist')
     if model_variant=='swift-1.5':
         metadata.update(id='kunalsinghh25/arc-hydra-duck-swift',title='ARC Hydra Duck Swift')
         metadata['model_sources']=[m for m in metadata['model_sources'] if 'intel-qwen' not in m]+manifest['model_sources']
@@ -287,7 +293,7 @@ def main():
     parser.add_argument('--runtime-overlay-dataset')
     parser.add_argument('--runtime-overlay-kernel')
     parser.add_argument('--runtime-overlay-sha256')
-    parser.add_argument('--agent-variant',choices=('baseline','rolling-summary','step-verification','verified-planning'),default='baseline')
+    parser.add_argument('--agent-variant',choices=('baseline','rolling-summary','step-verification','verified-planning','planning-assist'),default='baseline')
     parser.add_argument('--model-variant',choices=('intel','swift-1.5'),default='intel')
     args = parser.parse_args()
     notebook, metadata, provenance = build(args.mode,args.contest_reserve_seconds,args.runtime_overlay_dataset,args.runtime_overlay_sha256,args.agent_variant,args.model_variant,args.runtime_overlay_kernel)
@@ -295,6 +301,7 @@ def main():
                           'notebooks/duck_summary' if args.agent_variant=='rolling-summary' else
                           'notebooks/duck_verification' if args.agent_variant=='step-verification' else
                           'notebooks/verified_planner' if args.agent_variant=='verified-planning' else
+                          'notebooks/planning_assist' if args.agent_variant=='planning-assist' else
                           'notebooks/duck_v3_runtime' if (args.runtime_overlay_dataset or args.runtime_overlay_kernel) else 'notebooks/duck_m2')
     destination = (ROOT/output).resolve()
     if not destination.is_relative_to(ROOT):

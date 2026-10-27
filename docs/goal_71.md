@@ -9,7 +9,38 @@ uploads and successful tests do not prove success. Record the successful exact
 submission, score, current leaderboard comparison and verification timestamp.
 The goal remains active until official evidence meets it.
 
-## Latest checkpoint: 27 October, 21:35 IST — transcript-driven prompt repair
+## Latest checkpoint: 27 October, 23:46 IST — completed comparison and optional planning
+
+Both full comparison jobs are **COMPLETE** with substantive gameplay in all
+25 games. Original baseline/3: **45.0150**, 103 levels, five wins, 4,353,017
+accounted tokens. Strict planner/2: **33.1771**, 75 levels, four wins, 4,001,021
+tokens. Planner delta -11.8379 points; four improvements, 15 regressions, six
+ties. Do not promote the strict configuration. Individual causes (restriction,
+prompt conflict, model-building overhead, sampling) are not isolated. Findings,
+raw metrics, per-game comparison and mechanical events are retained.
+
+User requested updating and running a new notebook from both results. Implemented
+`planning-assist`: original ordinary batches/repeated calls and host guards stay
+available; optional plans still replay and check predictions. Added persistence
+and valid-step-limit guidance. No model/runtime/scheduler change or game routing.
+Exact CPU probe/5 COMPLETE passed eight sandbox cases and 16 prompt combinations.
+Current local suite: **97 passed**, including both mount layouts and consistent
+wheel/public-environment resolution.
+
+New exact job **kunalsinghh25/arc-hydra-ultimate-candidate/3** launched: all 25
+public games, one pass, 7200 seconds after readiness, 12000-second notebook cap.
+Observer **89287**. Versions 1/2 were terminal startup errors before inference,
+from dataset then competition-wheel short mount paths. Version 3 resolves all
+pinned inputs before installation. Logs show all five inputs found, runtime
+installation advancing, and installed helper hashes equal CPU v5. Model
+readiness, final gameplay and performance remain pending. Preserve exact run.
+
+Latest pre-launch quota: 66,962.601/108,000 seconds used, none reserved, paid
+scaling disabled. Daily official allowance remains zero. Official best stays
+**24.87**; latest verified competing leader **75.56**. Target remains official
+100 or strictly above the latest competing leader, refreshed before completion.
+
+## Previous checkpoint: 27 October, 21:35 IST — transcript-driven prompt repair
 
 Actual completed pilot transcripts exposed unchecked batching/repeated-action
 instructions in the **user** prompt, contradicting the enforced system contract

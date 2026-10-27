@@ -52,8 +52,32 @@ USER_PROMPT_REPLACEMENTS=(
      'When evidence supports a sequence, use `execute_plan` to verify and execute it. Otherwise take one informative exploratory action.'),
 )
 
+ASSIST_GUIDANCE='''
 
-def patched_sources(sandbox, agent, library):
+Optional prediction-checking tools:
+- Ordinary action(...) retains its original batching, repeated calls and host
+  guards. You do not need a simulator before exploring or executing a route.
+- When a compact mechanics model is useful, verify_model(predict, encode=None,
+  max_checks=512) checks recorded non-reset transitions in the current level.
+  Default state is a copied JSON-style numeric grid. Optional encode(grid)
+  returns a JSON-style abstract state; predict(state, action_dict) returns its
+  next state, or None for unknown. Models and encoders must be pure.
+- execute_plan(actions, predict, encode=None, max_steps=12, max_checks=512)
+  replays history, then predicts and checks each executed action. max_steps is
+  an integer from 1 to 16. It stops on contradictions, unknown predictions,
+  no gameplay change, host refusal, or terminal/level boundaries.
+- A failed replay means the checked plan is unavailable, not that you must stop
+  playing. Use ordinary action(...) to investigate and revise the model. Do not
+  keep repairing an expensive simulator when direct inspection and actions suffice.
+- No coverage, abstentions, truncated checks, contradictions, errors or constant
+  abstractions cannot certify a plan. Abstract agreement is not full-grid accuracy
+  or proof of the goal. Track uncertain win conditions separately.
+- Snippet variables do not persist. Put constants inside retained predict/encode
+  functions, use literal defaults, or pass data explicitly; avoid unretained globals.
+'''
+
+
+def patched_sources(sandbox, agent, library, enforce_probes=True):
     if 'ARC_HYDRA_VERIFIED_PLANNING' in sandbox:
         raise ValueError('Verified extension already installed; require fresh source copy')
     anchor='        _refresh_state(initial.get("state") or {})'
@@ -70,16 +94,19 @@ def patched_sources(sandbox, agent, library):
     addition=('        # ARC_HYDRA_VERIFIED_PLANNING\n'
               '        _hydra_api = {}\n'
               f'        exec(__import__("base64").b64decode("{payload}"), _hydra_api)\n'
-              '        _hydra_events = _hydra_api["install"](runtime_globals, _normalize_actions)\n')
+              f'        _hydra_events = _hydra_api["install"](runtime_globals, _normalize_actions, enforce_probes={enforce_probes!r})\n')
     sandbox=sandbox.replace(anchor,addition+anchor)
     sandbox=sandbox.replace(result_anchor,result_anchor+'\n                    "hydra_verified_events": _json_safe(_hydra_events),')
     sandbox=sandbox.replace(host_anchor,host_anchor+'\n                    "hydra_verified_events": list(message.get("hydra_verified_events") or []),')
-    prompt_code='\n'.join('    prompt = prompt.replace('+repr(a)+', '+repr(b)+')' for a,b in PROMPT_REPLACEMENTS)
-    agent=agent.replace(prompt_anchor,prompt_code+'\n    return prompt + '+repr(GUIDANCE)
+    prompt_code='\n'.join('    prompt = prompt.replace('+repr(a)+', '+repr(b)+')' for a,b in PROMPT_REPLACEMENTS) if enforce_probes else ''
+    agent=agent.replace(prompt_anchor,prompt_code+'\n    return prompt + '+repr(GUIDANCE if enforce_probes else ASSIST_GUIDANCE)
                         +'\n\n\n@dataclass(frozen=True)\nclass AnalyzerModelConfig:')
     user_code='        _hydra_user_prompt = "\\n".join(lines)\n'
-    user_code+='\n'.join('        _hydra_user_prompt = _hydra_user_prompt.replace('+repr(a)+', '+repr(b)+')'
-                          for a,b in USER_PROMPT_REPLACEMENTS)
+    if enforce_probes:
+        user_code+='\n'.join('        _hydra_user_prompt = _hydra_user_prompt.replace('+repr(a)+', '+repr(b)+')'
+                              for a,b in USER_PROMPT_REPLACEMENTS)
+    else:
+        user_code+='        _hydra_user_prompt += "\\nOptional: use verify_model/execute_plan for a useful compact model; ordinary action batching remains available."'
     agent=agent.replace(user_anchor,user_code+'\n        return _hydra_user_prompt\n\n    def _tools(')
     telemetry='''
         # Mechanical helper events, separate from model-authored stdout.
@@ -98,15 +125,16 @@ def patched_sources(sandbox, agent, library):
     return sandbox, agent
 
 
-def install(bundle, library):
+def install(bundle, library, enforce_probes=True):
     directory=Path(bundle)/'src/ARC3-Inference/inference/agent'
     paths=[directory/'python_tool_sandbox.py', directory/'tool_agent.py']
     before=[p.read_text(encoding='utf-8') for p in paths]
-    after=patched_sources(*before,library)
+    after=patched_sources(*before,library,enforce_probes=enforce_probes)
     # Validate both files before changing either. The source copy is notebook-local.
     for path, source in zip(paths,after):
         path.write_text(source,encoding='utf-8')
-    report=dict(extension='verified-planning-v2',library_sha256=sha256(library.encode()).hexdigest(),
+    report=dict(extension='verified-planning-v2' if enforce_probes else 'planning-assist-v1',
+                enforce_probes=enforce_probes,library_sha256=sha256(library.encode()).hexdigest(),
                 files={p.name:dict(before=sha256(a.encode()).hexdigest(),after=sha256(b.encode()).hexdigest())
                        for p,a,b in zip(paths,before,after)})
     print('ARC_HYDRA_VERIFIED_PLANNING_INSTALLED',json.dumps(report,sort_keys=True),flush=True)

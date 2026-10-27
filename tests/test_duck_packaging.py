@@ -182,3 +182,19 @@ def test_verified_planner_readiness_is_shared_by_public_and_competition(monkeypa
         record=json.loads((directory/'hydra_lifecycle.json').read_text())
         assert record['phase']=='model_ready'
         assert record['context']['competition']==competition
+
+
+def test_planning_assist_retains_serving_and_adds_optional_helpers():
+    notebook,metadata,provenance=build('benchmark',agent_variant='planning-assist')
+    baseline,baseline_meta,_=build('benchmark')
+    serving=lambda n:next(c['source'] for c in n['cells'] if c['source'].startswith('# Paste this entire file into the launcher cell.'))
+    assert serving(notebook)==serving(baseline)
+    assert metadata['model_sources']==baseline_meta['model_sources']
+    assert metadata['id']=='kunalsinghh25/arc-hydra-planning-assist'
+    assert provenance['public_runtime_seconds']==7200
+    setup=next(c['source'] for c in notebook['cells'] if 'install into the writable' in c['source'])
+    assert 'enforce_probes=False' in setup
+    run=next(c['source'] for c in notebook['cells'] if c['source'].startswith("print('Starting benchmark...')"))
+    assert "variant='planning-assist'" in run
+    assert 'start_lifecycle(bm,' in run
+    assert 'minimal_diagnostics=TRUE_SUBMISSION' in run
