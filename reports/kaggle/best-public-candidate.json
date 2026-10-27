@@ -1,0 +1,35 @@
+{
+  "recorded_at": "2026-10-27T20:36:21.238839+00:00",
+  "status": "best_observed_public_candidate",
+  "kernel": "kunalsinghh25/arc-hydra-ultimate-candidate/3",
+  "files": {
+    "kernel-metadata.json": "14956339e6f5ccd1ea29f8fa59566d5b957a01177ac22e3db936600981c28589",
+    "provenance.json": "f7a11df31d525ed4fc38f126654734e913b297b4324a3e7723971787c6295784",
+    "submission.ipynb": "f705335b5aa1a5b3ea55d2dfe3a8d4fa3e369da76ee0f451fa184df561c326f5"
+  },
+  "public_metrics": {
+    "games": 25,
+    "model_gameplay_verified": true,
+    "mean_public_score": 48.2861310586818,
+    "levels": 109,
+    "full_wins": 6,
+    "generated_tokens": 4429677
+  },
+  "official_score": null,
+  "best_scored_official_submission": {
+    "ref": "57657435",
+    "score": "24.87"
+  },
+  "submission_limits_at_check": {
+    "num_today": 1,
+    "num_total": 4,
+    "num_allowed_now": 0
+  },
+  "helper_adoption": "Not established; no mechanical event files in authoritative output listing",
+  "source_audit": {
+    "kernel-metadata.json": true,
+    "provenance.json": true,
+    "submission.ipynb": true
+  },
+  "boundary": "One stochastic public pass. Not proof of official improvement, helper benefit, or goal achievement."
+}

@@ -9,7 +9,31 @@ uploads and successful tests do not prove success. Record the successful exact
 submission, score, current leaderboard comparison and verification timestamp.
 The goal remains active until official evidence meets it.
 
-## Latest checkpoint: 28 October, 01:43 IST — mathematical study and general rules draft
+## Latest checkpoint: 28 October, 02:05 IST — Ultimate public result verified
+
+User reported the notebook finished. Exact **Ultimate Candidate/3 COMPLETE**.
+Final lifecycle clean; all 25 games have substantive model-driven gameplay.
+Final public mean **48.2861310587**, **109 levels**, **six full wins**,
+4,429,677 accounted tokens. Versus the matched original baseline/3: +3.2711
+points, +6 levels, +1 win, +76,660 tokens; 12 improved, nine regressed, four tied.
+Current best observed public candidate; still one stochastic comparison.
+
+Authoritative artifact inventory: 214 files, **no mechanical helper event files**.
+Selected AR25/R11L transcript audit parsed 280/284 tool blocks without direct
+verify_model/execute_plan call syntax. Do not claim checker adoption or credit
+the gain to mechanical planning. Installed code matches CPU/5 and the local
+notebook hashes match the uploaded version. Full metrics/comparison, lifecycle,
+source/adoption audit and findings are retained under the exact run directory.
+
+Best official remains **57657435 / 24.87**. Fresh daily allowance is zero; UTC
+rollover is **28 October 05:30 IST**. No official entry was made. Preserve this
+exact candidate and the scored baseline, recheck allowance before an official
+evaluation, and keep official-score generalization unproven. Mathematical
+rulebook/manual study and Qwen Max are not part of the completed notebook.
+Next independent change can test the compact general learning/evidence-memory
+procedure against this public candidate while preserving reproducibility.
+
+## Previous checkpoint: 28 October, 01:43 IST — mathematical study and general rules draft
 
 User requested deeper game study and research using game theory, mathematics
 and logic, followed by a broadly applicable strategy. Reviewed **11 primary
