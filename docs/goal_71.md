@@ -1,12 +1,45 @@
-# Active objective: beat the 71-point score
+# Active objective: official 100, or beat the latest competing leader
 
-The user explicitly requested this persistent goal on 25 October 2026. Success
-requires an official scored competition submission above the observed 71.48
-reference, using eligible, reproducible offline code. Public development scores,
-accepted uploads and successful tests do not prove success. The goal remains
-active until official evidence meets it.
+The user expanded the persistent goal on 27 October 2026: aim for an official
+100; if that is not achievable within the competition deadline and available
+resources, the minimum acceptable result is an official score strictly above
+the latest verified competing leader. The earlier 71.48 reference is historical.
+Use eligible, reproducible offline code. Public development scores, accepted
+uploads and successful tests do not prove success. Record the successful exact
+submission, score, current leaderboard comparison and verification timestamp.
+The goal remains active until official evidence meets it.
 
-## Latest checkpoint: 27 October, 21:16 IST — first gameplay result and full comparison
+## Latest checkpoint: 27 October, 21:27 IST — refreshed target and constraints
+
+Official authenticated Kaggle reads at 15:56 UTC show the current leader is
+**Yi-Chia Chen @ Fields Model / 75.56**, submitted 26 October 20:45 UTC.
+The requested target is therefore 100, with **strictly above 75.56** as the
+current fallback; refresh the leaderboard again before judging completion.
+The snapshot contains the first 200 leaderboard entries, not the complete board.
+
+Official submission **57657435 remains COMPLETE / 24.87**. The subsequent
+verification-hint entry **57686595 remains COMPLETE / 0.00**, with no returned
+error; its failure cause remains unknown. One submission was used today and
+**zero remain until the daily UTC reset**. No additional entry was made.
+
+Fresh official pages retain the **2 November 23:59 UTC** final deadline,
+offline notebook requirement, nine-hour execution limit and publicly available
+external-data/model allowance. Quota is 52,190.481 seconds used of 108,000,
+with 42,541.713 seconds reserved by running sessions. Used plus reserved leaves
+about **3.69 hours currently uncommitted**; do not treat reserved quota as freely
+available or enable paid scaling. The quota refresh is 31 October 00:00 UTC.
+
+Both exact comparison jobs are authoritatively RUNNING. Model files finished
+precaching, but backend readiness/gameplay is not yet established. Preserve the
+same jobs. Evidence: `reports/kaggle/current-competition-state.json`. The new
+per-game comparison script passed five targeted checks and a self-comparison
+on actual completed pilot artifacts; it has not yet compared the live runs.
+
+Research searches did not establish a public implementation or method for the
+current leading entry. Do not attribute the leader's score to a particular model,
+training recipe or harness without primary evidence.
+
+## Previous checkpoint: 27 October, 21:16 IST — first gameplay result and full comparison
 
 Verified-planner pilot **version 1 COMPLETE**. All five games played: public
 mean **15.9206**, 10 levels, zero full wins, 343,178 accounted tokens. Lifecycle
