@@ -23,3 +23,20 @@ timer included startup and cannot establish a quality gain for this candidate.
 Promotion requires the complete evidence, not early snapshots or a successful
 upload. A single public comparison does not prove hidden score improvement or
 completion of the official >71.48 objective.
+
+After both exact jobs finish, download their `benchmark.json` and model summaries
+into their versioned report directories. Run the substantive-gameplay analyzer
+on each, then compare the raw histories:
+
+```powershell
+.venv/Scripts/python.exe scripts/compare_duck_runs.py reports/kaggle/duck-m2-benchmark-v3 reports/kaggle/verified-planner-v2 --output reports/kaggle/verified-planner-v2/comparison.json
+.venv/Scripts/python.exe scripts/analyze_verified_events.py reports/kaggle/verified-planner-v2
+```
+
+The comparison requires 25 unique matching games, single-pass finished outputs,
+substantive model gameplay, consistent action accounting, matching level counts
+and game weights, and elapsed durations within 120 seconds. It reconstructs
+tokens including terminal no-action generation, hashes both raw inputs and emits
+per-game deltas. Startup/readiness alignment still requires separate source/log
+inspection; elapsed-time matching alone cannot prove it. No automatic promotion
+or statistical confidence claim is made from one stochastic pair.
