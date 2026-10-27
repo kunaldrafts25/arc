@@ -32,3 +32,24 @@ after readiness per arm. Both use the original model/runtime and full public
 diagnostics. The planner's helper and installer code are frozen from this pilot.
 One stochastic run per arm cannot establish a precise causal effect or predict
 official hidden scores. No official entry is made from the pilot.
+
+## Later transcript audit: conflicting user guidance
+
+The two inspected transcripts repeat incompatible user instructions on every
+turn: BP35 has 34 such user prompts, VC33 has 37. They tell the model to prefer
+unchecked batches and allow repeated action calls despite the system contract.
+VC33's reasoning explicitly notes the conflict. This establishes a prompt defect,
+not its quantitative score effect. See `prompt-audit.json` for hashes/counts.
+
+The source installer now produces extension v2, rewriting both user and system
+prompts. Local relevant checks: 27 passed. Exact offline CPU probe version 4 is
+COMPLETE with seven mechanical checks and 16 rendered user-prompt combinations
+passing. The mechanical checker and installed sandbox hashes are unchanged.
+No new GPU candidate has been launched from this fix. Full comparison notebook
+version 2 retains the earlier extension v1, preserving its uploaded configuration.
+
+Other observed issues remain follow-up evidence: VC33 used an unsupported
+`max_steps` value once and retained a predictor referencing an ordinary global
+that was not retained. BP35 used exploratory actions without a completed plan,
+including one second-probe refusal and an unrelated model-written dictionary-key
+error. Do not attribute every error or zero to the prompt conflict.

@@ -151,6 +151,17 @@ def test_mouse_coordinates_and_reset_boundary_are_preserved():
     assert observed==[dict(action='MOUSE',row=3,col=8)]
 
 
+def test_user_prompt_gate_detects_original_batching_contract(monkeypatch):
+    monkeypatch.syspath_prepend(str(ROOT/'vendor/duck-m2/ARC3-Inference'))
+    from scripts.verified_agent_probe import check_user_prompts
+    original=(ROOT/'vendor/duck-m2/ARC3-Inference/inference/agent/tool_agent.py').read_text(encoding='utf-8')
+    with pytest.raises(AssertionError,match='more than once'):
+        check_user_prompts(original)
+    sandbox=(ROOT/'vendor/duck-m2/ARC3-Inference/inference/agent/python_tool_sandbox.py').read_text(encoding='utf-8')
+    _,agent=patched_sources(sandbox,original,(ROOT/'hydra/verified_planning.py').read_text(encoding='utf-8'))
+    assert len(check_user_prompts(agent))==16
+
+
 def test_patched_real_sandbox_executes_checked_plan(monkeypatch):
     monkeypatch.syspath_prepend(str(ROOT/'vendor/duck-m2/ARC3-Inference'))
     source=ROOT/'vendor/duck-m2/ARC3-Inference/inference/agent'

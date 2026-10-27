@@ -9,7 +9,25 @@ uploads and successful tests do not prove success. Record the successful exact
 submission, score, current leaderboard comparison and verification timestamp.
 The goal remains active until official evidence meets it.
 
-## Latest checkpoint: 27 October, 21:27 IST — refreshed target and constraints
+## Latest checkpoint: 27 October, 21:35 IST — transcript-driven prompt repair
+
+Actual completed pilot transcripts exposed unchecked batching/repeated-action
+instructions in the **user** prompt, contradicting the enforced system contract
+on all 34/37 inspected BP35/VC33 turns. The model explicitly noticed the conflict.
+Earlier CPU v3 covered the system prompt only; it did not establish conversation
+consistency. Source extension v2 now rewrites both paths, including optional
+duplicate guidance and opener hints. The mechanical library/sandbox is unchanged.
+
+Relevant local checks: **27 passed**. Exact offline CPU probe **version 4 COMPLETE**
+passed seven sandbox checks and 16 actual rendered user-prompt combinations.
+Evidence: `reports/kaggle/verified-planner-v1/prompt-audit.json` and
+`reports/kaggle/verified-cpu-probe-v4/`. No GPU or official score gain is claimed.
+The two current GPU runs remain RUNNING on their frozen uploaded configurations;
+verified-planner/2 still uses extension v1. Early snapshots now show substantive
+model gameplay in some games, while others wait for inference slots. Require
+final outputs and all-game coverage before promotion or another GPU experiment.
+
+## Previous checkpoint: 27 October, 21:27 IST — refreshed target and constraints
 
 Official authenticated Kaggle reads at 15:56 UTC show the current leader is
 **Yi-Chia Chen @ Fields Model / 75.56**, submitted 26 October 20:45 UTC.

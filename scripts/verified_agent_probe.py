@@ -1,8 +1,42 @@
 """CPU/Linux smoke tests against the actual installed sandbox RPC runner."""
 import json
 import ast
+import __future__
+from itertools import product
 import os
 from pathlib import Path
+from types import SimpleNamespace
+
+
+def check_user_prompts(agent_source):
+    """Render the real per-turn method across memory/batching/opener branches."""
+    from inference.agent import prompts
+    methods=[node for node in ast.walk(ast.parse(agent_source))
+             if isinstance(node,ast.FunctionDef) and node.name=='_build_user_prompt']
+    assert len(methods)==1, 'Unexpected user-prompt builder layout'
+    namespace=dict(vars(prompts))
+    false=lambda *args,**kwargs:False
+    namespace.update(_WM_NUDGE_TURNS=0,_wm_revise_nudges_enabled=false,
+        _get_env_bool=false,_normalize_valid_actions=lambda actions:actions,
+        _format_valid_action_line=lambda actions:', '.join(actions))
+    exec(compile(ast.Module(body=methods,type_ignores=[]),'installed-user-prompt','exec',
+                 flags=__future__.annotations.compiler_flag),namespace)
+    instance=SimpleNamespace(_pending_wm_rebuild_reason='',
+        _prepare_auto_diff=lambda *args:[],_death_ledger_observe=lambda *args:None,
+        _summarized_knowledge_lines=lambda:[],_memory_section_guidance=lambda *args:[])
+    rendered=[]
+    for memory_off,dedupe,opener,action_num in product((False,True),repeat=4):
+        namespace.update(_memory_sections_disabled=lambda:memory_off,
+                         _dedupe_multicall_line=lambda:dedupe,
+                         _opener_commit_hint=lambda:opener)
+        text=namespace['_build_user_prompt'](instance,int(action_num),valid_actions=['MOUSE'])
+        for forbidden in ('more than once in one Python snippet','prefer batching it',
+                          'otherwise batch the route','best valid action or ordered batch'):
+            assert forbidden not in text, (forbidden,memory_off,dedupe,opener,action_num)
+        assert 'One exploratory action is allowed' in text
+        assert 'execute_plan(actions, predict, encode=None)' in text
+        rendered.append(text)
+    return rendered
 
 
 def check_prompt(agent_source):
@@ -20,6 +54,7 @@ def check_prompt(agent_source):
     assert 'Call `action(actions)` to execute one or more' not in prompt
     assert 'execute_plan(actions, predict' in prompt
     assert 'One exploratory `action(...)` call' in prompt
+    check_user_prompts(agent_source)
     return prompt
 
 
@@ -66,7 +101,9 @@ def run_probe():
     from inference.agent import python_tool_sandbox
     agent_file=Path(python_tool_sandbox.__file__).with_name('tool_agent.py')
     check_prompt(agent_file.read_text(encoding='utf-8'))
-    output=dict(passed=True,cases=reports,prompt_contract_consistent=True,boundary='Synthetic CPU integration checks of installed sandbox and prompt contract; no model inference, gateway or ARC gameplay tested')
+    output=dict(passed=True,cases=reports,prompt_contract_consistent=True,
+        prompt_contract_scope='System prompt plus 16 rendered user-prompt combinations: memory on/off, duplicate guidance on/off, opener hint on/off, initial/resumed turn. Not exhaustive configuration coverage.',
+        boundary='Synthetic CPU integration checks of installed sandbox and prompt contract; no model inference, gateway or ARC gameplay tested')
     Path('/kaggle/working/verified-probe.json').write_text(json.dumps(output,indent=2)+'\n')
     print('VERIFIED_AGENT_CPU_PROBE_PASSED',json.dumps(dict(cases=len(reports))),flush=True)
     return output

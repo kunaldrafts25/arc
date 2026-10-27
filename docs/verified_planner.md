@@ -44,6 +44,17 @@ before writing. Source hashes are retained in `hydra_extension.json`. The old
 instructions allowing arbitrary unchecked batches are rewritten to match the new
 contract; the full contract is appended to the rendered system prompt.
 
+Extension v2 also rewrites the per-turn user prompt. Actual pilot transcripts
+revealed that extension v1 left repeated user instructions encouraging unchecked
+batches and repeated exploratory actions. The model explicitly noticed the
+conflict. CPU probe v3 checked the system prompt only, so its consistency result
+was narrower than the full conversation. Probe v4 adds 16 rendered user-prompt
+combinations covering memory, duplicate guidance, opener hints and initial versus
+resumed turns, alongside the same seven mechanical sandbox cases. All pass on
+the actual Kaggle bundle. The checker library/sandbox code is unchanged. Current
+GPU notebook `verified-planner/2` remains the uploaded v1 extension; do not
+attribute the v2 fix to that run or infer a measured score gain from CPU checks.
+
 Mechanical events cross the sandbox RPC separately from model-written stdout
 and are saved as `artifacts/*.hydra-events.jsonl`. The event analyzer measures
 replay checks, refusals, completed planned actions and mismatches. Interrupted

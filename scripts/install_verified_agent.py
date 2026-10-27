@@ -41,6 +41,17 @@ PROMPT_REPLACEMENTS=(
      '- One exploratory `action(...)` call is allowed per snippet; checked plans refresh state after every action.\n'),
 )
 
+USER_PROMPT_REPLACEMENTS=(
+    ('When ready, call `action(actions)` from inside the `python` tool with the best valid action or ordered batch selected by your code. If your code has found a reliable short sequence, prefer batching it in one call.',
+     'When ready, take one exploratory action with `action(actions)`, or execute a replay-supported sequence with `execute_plan(actions, predict, encode=None)`.'),
+    ('You may call `action(actions)` more than once in one Python snippet if your search or control loop needs it.',
+     'One exploratory action is allowed per Python snippet; use `execute_plan` for checked sequences.'),
+    ('You may call `action(actions)` more than once in one Python snippet if your search or control loop needs it, ',
+     'Use `execute_plan` for checked sequences, '),
+    ('When your evidence supports a choice, call `action(actions)` with the sequence it supports. Probe with a single action when you genuinely need to distinguish two possibilities; otherwise batch the route you have.',
+     'When evidence supports a sequence, use `execute_plan` to verify and execute it. Otherwise take one informative exploratory action.'),
+)
+
 
 def patched_sources(sandbox, agent, library):
     if 'ARC_HYDRA_VERIFIED_PLANNING' in sandbox:
@@ -50,9 +61,10 @@ def patched_sources(sandbox, agent, library):
     result_anchor='                    "action_results": _json_safe(action_results),'
     host_anchor='                    "keepable_functions": list(message.get("keepable_functions") or []),'
     telemetry_anchor='        rendered_stdout = str(sandbox_result.get("stdout", "") or "")'
+    user_anchor='        return "\\n".join(lines)\n\n    def _tools('
     if (sandbox.count(anchor)!=1 or agent.count(prompt_anchor)!=1
             or sandbox.count(result_anchor)!=2 or sandbox.count(host_anchor)!=1
-            or agent.count(telemetry_anchor)!=1):
+            or agent.count(telemetry_anchor)!=1 or agent.count(user_anchor)!=1):
         raise ValueError('Unexpected Duck source layout; refusing an unverified patch')
     payload=base64.b64encode(library.encode()).decode()
     addition=('        # ARC_HYDRA_VERIFIED_PLANNING\n'
@@ -65,6 +77,10 @@ def patched_sources(sandbox, agent, library):
     prompt_code='\n'.join('    prompt = prompt.replace('+repr(a)+', '+repr(b)+')' for a,b in PROMPT_REPLACEMENTS)
     agent=agent.replace(prompt_anchor,prompt_code+'\n    return prompt + '+repr(GUIDANCE)
                         +'\n\n\n@dataclass(frozen=True)\nclass AnalyzerModelConfig:')
+    user_code='        _hydra_user_prompt = "\\n".join(lines)\n'
+    user_code+='\n'.join('        _hydra_user_prompt = _hydra_user_prompt.replace('+repr(a)+', '+repr(b)+')'
+                          for a,b in USER_PROMPT_REPLACEMENTS)
+    agent=agent.replace(user_anchor,user_code+'\n        return _hydra_user_prompt\n\n    def _tools(')
     telemetry='''
         # Mechanical helper events, separate from model-authored stdout.
         _hydra_events = sandbox_result.get("hydra_verified_events") or []
@@ -90,7 +106,7 @@ def install(bundle, library):
     # Validate both files before changing either. The source copy is notebook-local.
     for path, source in zip(paths,after):
         path.write_text(source,encoding='utf-8')
-    report=dict(extension='verified-planning-v1',library_sha256=sha256(library.encode()).hexdigest(),
+    report=dict(extension='verified-planning-v2',library_sha256=sha256(library.encode()).hexdigest(),
                 files={p.name:dict(before=sha256(a.encode()).hexdigest(),after=sha256(b.encode()).hexdigest())
                        for p,a,b in zip(paths,before,after)})
     print('ARC_HYDRA_VERIFIED_PLANNING_INSTALLED',json.dumps(report,sort_keys=True),flush=True)
