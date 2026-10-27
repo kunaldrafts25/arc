@@ -29,9 +29,13 @@ with 42,541.713 seconds reserved by running sessions. Used plus reserved leaves
 about **3.69 hours currently uncommitted**; do not treat reserved quota as freely
 available or enable paid scaling. The quota refresh is 31 October 00:00 UTC.
 
-Both exact comparison jobs are authoritatively RUNNING. Model files finished
-precaching, but backend readiness/gameplay is not yet established. Preserve the
-same jobs. Evidence: `reports/kaggle/current-competition-state.json`. The new
+Both exact comparison jobs are authoritatively RUNNING. Both backends reached
+readiness (649/652 seconds of server startup). Their 7,200-second benchmark
+windows began at 15:57:08/15:57:19 UTC, with deadlines 17:57:08/17:57:19 UTC
+(23:27 IST), followed by bounded cancellation/finalization. Candidate installed
+extension hashes match the completed pilot. Substantive gameplay across all
+25 games and final scores remain unverified. Preserve the same jobs. Evidence:
+`reports/kaggle/current-competition-state.json` and each run's `startup.json`. The new
 per-game comparison script passed five targeted checks and a self-comparison
 on actual completed pilot artifacts; it has not yet compared the live runs.
 
