@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-27T15:56:20.656805+00:00",
+  "checked_at": "2026-10-27T17:49:02.569116+00:00",
   "competition": "arc-prize-2026-arc-agi-3",
   "leaderboard_url": "https://www.kaggle.com/competitions/arc-prize-2026-arc-agi-3/leaderboard",
   "leaderboard_rows": [
@@ -13,7 +13,7 @@
       "team_id": 15486995,
       "team_name": "Tufa Labs",
       "score": "68.91",
-      "submission_date": "2026-10-26T14:16:07.546000"
+      "submission_date": "2026-10-27T08:46:34.666000"
     },
     {
       "team_id": 15605182,
@@ -227,7 +227,7 @@
     },
     {
       "team_id": 17074270,
-      "team_name": "Slightest",
+      "team_name": "\uc5b4\uba38\ub2c8\ub294 \uc9dc\uc7a5\uba74\uc774 \uc2eb\ub2e4\uace0 \ud558\uc168\uc5b4",
       "score": "36.25",
       "submission_date": "2026-10-27T06:07:38.360000"
     },
@@ -265,7 +265,7 @@
       "team_id": 16473776,
       "team_name": "Sumatorikki",
       "score": "36.11",
-      "submission_date": "2026-10-24T12:00:56.416000"
+      "submission_date": "2026-10-27T07:59:28.326000"
     },
     {
       "team_id": 16370456,
@@ -457,7 +457,7 @@
       "team_id": 17194058,
       "team_name": "kobq",
       "score": "34.06",
-      "submission_date": "2026-10-26T08:17:13.716000"
+      "submission_date": "2026-10-27T08:34:32.100000"
     },
     {
       "team_id": 16674808,
@@ -703,7 +703,7 @@
       "team_id": 17051978,
       "team_name": "chang liu",
       "score": "33.47",
-      "submission_date": "2026-10-25T06:18:02.586000"
+      "submission_date": "2026-10-27T07:38:10.383000"
     },
     {
       "team_id": 15631128,
@@ -829,7 +829,7 @@
       "team_id": 15524067,
       "team_name": "Patrick Chan",
       "score": "33.25",
-      "submission_date": "2026-10-24T00:25:32.603000"
+      "submission_date": "2026-10-27T08:18:19.786000"
     },
     {
       "team_id": 17013528,
@@ -859,7 +859,7 @@
       "team_id": 16966091,
       "team_name": "Gateri Jeremiah",
       "score": "33.22",
-      "submission_date": "2026-10-23T17:02:05.376000"
+      "submission_date": "2026-10-27T08:18:50.613000"
     },
     {
       "team_id": 17060073,
@@ -1211,9 +1211,9 @@
     "limited_by_total": false
   },
   "quota": {
-    "gpu_used_seconds": 52190.480911,
+    "gpu_used_seconds": 65714.363528,
     "gpu_allowed_seconds": 108000.0,
-    "gpu_reserved_seconds": 42541.712544,
+    "gpu_reserved_seconds": 35779.771236,
     "pay_to_scale_enabled": false,
     "refresh_time": "2026-10-31T00:00:00"
   },
@@ -1246,7 +1246,7 @@
       "public_score": "24.87",
       "private_score": "",
       "error": "",
-      "checked_at": "2026-10-27T15:56:49.536155+00:00"
+      "checked_at": "2026-10-27T17:51:23.115258+00:00"
     },
     {
       "ref": "57686595",
@@ -1254,7 +1254,7 @@
       "public_score": "0.00",
       "private_score": "",
       "error": "",
-      "checked_at": "2026-10-27T15:56:51.031786+00:00"
+      "checked_at": "2026-10-27T17:51:24.442111+00:00"
     }
   ]
 }
