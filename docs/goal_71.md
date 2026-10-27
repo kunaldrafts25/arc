@@ -6,7 +6,35 @@ reference, using eligible, reproducible offline code. Public development scores,
 accepted uploads and successful tests do not prove success. The goal remains
 active until official evidence meets it.
 
-## Latest checkpoint: 27 October, 20:32 IST — verified planner implemented
+## Latest checkpoint: 27 October, 21:16 IST — first gameplay result and full comparison
+
+Verified-planner pilot **version 1 COMPLETE**. All five games played: public
+mean **15.9206**, 10 levels, zero full wins, 343,178 accounted tokens. Lifecycle
+ended cleanly. Actual mechanical events show 29 passing abstract-state replay
+checks, 158 planned actions and three prospective mismatches stopping batches.
+All 51 checks were abstract-state, so full-grid model correctness is unproven.
+See `reports/kaggle/verified-planner-v1/findings.md` and event analysis.
+
+The old five-game baseline is not a fair quality comparator: its 900-second
+benchmark started ~8.5 minutes before model readiness, unlike the new pilot's
+post-readiness timer. Do not claim a causal gain from 11.40 versus 15.92.
+
+Launched full matched public comparison (one stochastic pass per arm):
+
+- `kunalsinghh25/arc-hydra-duck-m2-baseline/3`, exact source hashes verified
+  against the previous completed baseline/2; observer **64036**.
+- `kunalsinghh25/arc-hydra-verified-planner/2`, helper/installer unchanged from
+  the passed CPU gate and completed GPU pilot; observer **24665**.
+
+Both use all 25 public games, original model/runtime, 7,200 seconds after
+readiness, full public diagnostics and 12,000-second notebook timeouts.
+Latest pre-launch free GPU balance: 57,133.787 seconds, paid scaling disabled.
+Next: verify both readiness windows and final gameplay, then compare score,
+completion curves, per-game variability and helper overhead before promotion.
+These are inference experiments, not model-weight training. No official entry
+was made. Best scored official remains 24.87; >71.48 is still unachieved.
+
+## Previous checkpoint: 27 October, 20:32 IST — verified planner implemented
 
 User authorized building the strongest candidate and all required actions.
 Implemented the verified-planning agent on the frozen original model/runtime:

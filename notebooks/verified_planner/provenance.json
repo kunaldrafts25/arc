@@ -22,20 +22,14 @@
     "Tufa Labs"
   ],
   "license": "Apache-2.0; third-party model/runtime licenses also apply",
-  "mode": "preflight",
-  "public_games": [
-    "ft09",
-    "ls20",
-    "r11l",
-    "vc33",
-    "bp35"
-  ],
-  "public_runtime_seconds": 900,
+  "mode": "benchmark",
+  "public_games": "all 25",
+  "public_runtime_seconds": 7200,
   "public_startup_allowance_seconds": 3600,
   "competition_changes": "Mechanically checked replay/planned actions, one exploratory action per tool call; shared model readiness, lifecycle counters and global finalization reserve. Original model/runtime/scheduler retained.",
   "competition_finalization_reserve_seconds": 600,
   "agent_variant": "verified-planning",
   "verified_planning_sha256": "2fbcd9dc435ae8844e770fee3fce6987c0c37da7aecea6f5f41feb7b7cdf7172",
   "extension_installer_sha256": "995b25a90892ace4ea42d307fde39f653544f08d0376e7fa746d9b3e120c29cd",
-  "public_competition_diagnostics": true
+  "public_competition_diagnostics": false
 }
