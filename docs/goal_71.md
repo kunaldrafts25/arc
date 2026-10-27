@@ -9,7 +9,44 @@ uploads and successful tests do not prove success. Record the successful exact
 submission, score, current leaderboard comparison and verification timestamp.
 The goal remains active until official evidence meets it.
 
-## Latest checkpoint: 28 October, 00:48 IST — direct study of general game learning
+## Latest checkpoint: 28 October, 01:43 IST — mathematical study and general rules draft
+
+User requested deeper game study and research using game theory, mathematics
+and logic, followed by a broadly applicable strategy. Reviewed **11 primary
+sources** on game-type/algorithm selection, Bayes-adaptive planning, causal
+interventions, dual control, abstraction, UCT, SAT planning, risk-aware control,
+LLM plan horizons and trace-based POMDP learning. Review scope and limitations
+are explicit in `reports/research/2026-10-28/sources-and-evidence.json`.
+
+Direct public study is now **155 actions across all 25 games, five completed
+levels across three games, zero full wins**. AR25 retains two completions. LP85
+now has two: learned a 20-slot cycle/inverse, then fitted three overlapping
+permutation generators on 42 slots. Full-color search hit its ~100,000-state
+cap; a two-token abstraction discovered 335 states and an eight-action plan.
+All 42 predicted tile colors matched for the first seven actions; the eighth
+completed the level. CN04 has one completion: a connected multicolor tool fit
+a quarter-turn, then ten body-pose predictions matched and the eleventh action
+completed the contact-alignment plan. No game implementation was read.
+
+G50T exposed an unresolved orange barrier that invalidated a speculative route;
+WA30 timing/active-object effects remain unresolved. Ten further mechanics
+contexts were probed. Do not describe the sweep as 25 full playthroughs or
+near-universal competence. Updated raw observation hash/counts and compact
+rotation, contact and permutation experiment records are retained.
+
+Draft **`docs/general_game_learning_rules.md`** selects methods by observed
+structure and verified assumptions, with separate controls/state/mechanics/goals,
+discriminating probes, adaptive abstraction, solver selection and guarded plans.
+It contains no game IDs. Detailed report: approximately 2,400 words in
+`reports/research/2026-10-28/mathematical_strategy.md`. Draft is not installed in
+the current candidate; no new weights, code promotion or score claim is made.
+
+Ultimate Candidate/3 is authoritatively RUNNING on its preserved configuration,
+with gameplay deadline 01:54:38 IST. Require final artifacts before comparison.
+Current public snapshots are unfinished. Official best remains 24.87 and full
+100/latest-competing-leader objective remains active.
+
+## Previous checkpoint: 28 October, 00:48 IST — direct study of general game learning
 
 User asked for direct play to improve strategy, then clarified that the goal is
 a general way to understand unfamiliar games, rather than game-specific pattern
