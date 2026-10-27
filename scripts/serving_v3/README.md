@@ -109,3 +109,11 @@ exact completed CPU version 6 output and manifest SHA
 It retains the original target/draft, tools, prompts and scheduling, and tests
 five public games for 900 seconds after readiness. Neither successful upload
 nor CPU completion establishes GPU inference or a score improvement.
+
+GPU version 1 ended ERROR: Triton's host-C driver helper could not find the
+system Python multiarch `pyconfig.h` through Conda GCC's sysroot. The CPU input
+probe independently verified every bundle hash at the expected mount path.
+Version 2 uses system `/usr/bin/gcc` for host-C/Python extension compilation,
+retains GCC15 for C++/CUDA-host compilation, and probes Triton's real driver
+helper before checkpoint loading. This is an integration repair; no GPU speed
+or agent score improvement is established yet.

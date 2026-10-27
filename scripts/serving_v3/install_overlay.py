@@ -61,6 +61,11 @@ def run(command, env):
 def install(root, base, venv, uv, port):
     if sys.platform!='linux' or platform.machine()!='x86_64' or sys.version_info[:2]!=(3,12):
         raise RuntimeError('Overlay requires Linux x86_64 with Python 3.12')
+    # Triton's host-C extension includes Kaggle's system Python headers. The
+    # Conda compiler sysroot does not search Debian's multiarch header paths.
+    host_cc=Path('/usr/bin/gcc')
+    if not host_cc.is_file():
+        raise RuntimeError('System host-C compiler required for Python extensions')
     with socket.socket() as probe:
         if probe.connect_ex(('127.0.0.1',port))==0:
             raise RuntimeError('Model server is already listening; refusing an in-place update')
@@ -91,7 +96,7 @@ def install(root, base, venv, uv, port):
         run([uv,'pip','install','--python',venv/'bin/python','--no-index',
              '--find-links',base/'wheels','--find-links',root/'wheels',
              '-r',root/'requirements-overlay.lock'],env)
-    env.update(CC=str(gcc/'bin/x86_64-conda-linux-gnu-gcc'),
+    env.update(CC=str(host_cc),
                CXX=str(gcc/'bin/x86_64-conda-linux-gnu-g++'),
                CUDAHOSTCXX=str(gcc/'bin/x86_64-conda-linux-gnu-g++'),
                CUDA_HOME=str(cuda),CUDA_PATH=str(cuda),CUDACXX=str(cuda/'bin/nvcc'),
@@ -107,6 +112,12 @@ def install(root, base, venv, uv, port):
          'from pathlib import Path; import flashinfer; '
          'assert (Path(flashinfer.__file__).parent/"data/aot/fused_moe_120/fused_moe_120.so").is_file(); '
          'print("Runtime overlay installed; GPU inference still unverified")'],env)
+    # Exercise the exact Triton driver-helper compilation that failed v1,
+    # before spending time loading the large model checkpoint.
+    run([venv/'bin/python','-c',
+         'import torch; assert torch.cuda.is_available(); '
+         'from triton.runtime import driver; '
+         'print("Triton CUDA host-extension probe passed; device",driver.active.get_current_device())'],env)
     marker.write_text(json.dumps(identity,indent=2)+'\n')
     keys=('CC','CXX','CUDAHOSTCXX','CUDA_HOME','CUDA_PATH','CUDACXX','PATH','LD_LIBRARY_PATH')
     return {key:env[key] for key in keys}

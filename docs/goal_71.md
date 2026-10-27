@@ -6,7 +6,38 @@ reference, using eligible, reproducible offline code. Public development scores,
 accepted uploads and successful tests do not prove success. The goal remains
 active until official evidence meets it.
 
-## Latest checkpoint: 27 October, 00:04 IST
+## Latest checkpoint: 27 October, 08:18 IST
+
+Best scored official entry remains **57657435 / 24.87**. New official entry
+**57686595** is accepted and PENDING, with no score/error at 08:17 IST. It uses
+the exact completed verification notebook version 1, whose local hashes match
+the saved upload. Allowance was checked before submitting; zero entries remain
+today. The >71.48 goal remains unverified and active.
+
+Verification/1 is COMPLETE: all 25 games have verified model gameplay, public
+mean **46.2321**, 102 levels and eight full wins, versus original **43.7621**,
+102 levels and five wins. Actual FT09 system-prompt content confirms the
+step-verification addendum is active. This is the highest measured public
+candidate, not an official-score prediction or proof of a causal improvement.
+Final metrics, hashed prompt evidence and official selection are retained in
+`reports/kaggle/duck-verification-v1/`.
+
+The CPU input probe is COMPLETE: all 36 files / 1,978,944,573 bytes match the
+pinned manifest at the supported `/kaggle/input/notebooks/...` mount path.
+Runtime/1 is ERROR. Its server log shows Conda GCC could not find Debian's
+multiarch Python `pyconfig.h` while Triton compiled `cuda_utils.c`; the later
+server exit -9 is not evidence of an out-of-memory failure.
+
+Runtime repair **kunalsinghh25/arc-hydra-duck-v3-runtime/2** is uploaded. It uses
+system `/usr/bin/gcc` for host-C/Python extensions, retains GCC15 C++/CUDA-host
+compilation, and probes the exact Triton driver-helper path before model loading.
+The same CPU-verified bundle, model, agent and five-game/900-second preflight
+remain. Thirteen packaging tests passed. Observer 97875 follows version 2.
+Remaining free GPU quota: 59,646.734 seconds (16.57 hours); paid scaling disabled.
+Next: poll exact official 57686595 and observe runtime/2. Do not re-submit today
+or promote v3 before successful GPU gameplay and a matched full public comparison.
+
+## Previous checkpoint: 27 October, 00:04 IST
 
 User explicitly requested uploading the current best and checking results. The
 official allowance read returned one remaining entry. Submitted the exact
