@@ -19,3 +19,12 @@ local source hashes matched `upload.json` and the allowance query returned one
 remaining entry. Zero entries remain today. Initial official status is PENDING;
 the highest official scored result remains original baseline **24.87**.
 This public 46.23 is separate from the official competition score.
+
+The per-game comparison has nine improved scores, seven worsened scores and
+nine ties; four full wins are common to both runs. R11L, VC33 and CD82 gained
+85.71, 78.57 and 64.10 points respectively, while M0R0, CN04 and DC22 lost
+71.43, 66.67 and 47.62. Equal aggregate level counts therefore hide substantial
+trajectory differences. These unpaired stochastic runs do not establish which
+differences come from the prompt, scheduling or sampling. The complete rows
+and input hashes are in `per-game-comparison.json`. No game-ID-specific choice
+between these variants is deployed.
