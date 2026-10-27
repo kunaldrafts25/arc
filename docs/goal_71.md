@@ -9,7 +9,43 @@ uploads and successful tests do not prove success. Record the successful exact
 submission, score, current leaderboard comparison and verification timestamp.
 The goal remains active until official evidence meets it.
 
-## Latest checkpoint: 27 October, 23:46 IST — completed comparison and optional planning
+## Latest checkpoint: 28 October, 00:48 IST — direct study of general game learning
+
+User asked for direct play to improve strategy, then clarified that the goal is
+a general way to understand unfamiliar games, rather than game-specific pattern
+solutions. Built `scripts/manual_arcade.py`, an observation/action-only local
+public-game bridge. Used the official public API without reading game
+implementations or accessing hidden environments.
+
+Direct study so far: **99 gameplay actions across all 25 games**, two completed
+levels in AR25, no full wins. All games received at least two chosen probes;
+this is an initial intervention sweep, not 25 full playthroughs. Observed
+controls, opposite-action tests, exact-hit selection, budget-only changes,
+counterexamples and latent-mode behavior. A conditional reflection/control-mode
+model supported two actual level completions. Two proposed FT09 goal
+transformations did not advance its level; mechanics versus goals remain
+distinct uncertainties. No game-ID routing is added to the deployed agent.
+
+Artifacts: `reports/manual-play/2026-10-28/` contains selected probe plans/results,
+session counts/hash and `general-learning-strategy.md`. Full observations/images
+are in ignored `reference/manual-play/2026-10-28/`. Live local bridge session
+**6385**, bound only to localhost:8788; retained public game states remain useful
+for deeper play. Action enum lookup was fixed before gameplay. A control failure
+led to restarting initial observations once; the summary distinguishes those
+warmup records from actual actions.
+
+Next agent intervention proposed by the study: compact evidence-backed memory
+separating controls/state/mechanics/goals, competing hypotheses, discriminating
+experiments, specific failure diagnosis and conditional short planning. It is a
+proposal, not yet installed in the running notebook or proven on unseen games.
+Continue deeper public play and test transfer on fresh mechanics families.
+
+Ultimate Candidate/3 remains the current cloud experiment. Backend readiness is
+verified; its 7200-second gameplay deadline is **28 October 01:54:38 IST**.
+Final outputs and an official score improvement remain pending. Official best
+24.87; latest verified competing leader 75.56; full goal still active.
+
+## Previous checkpoint: 27 October, 23:46 IST — completed comparison and optional planning
 
 Both full comparison jobs are **COMPLETE** with substantive gameplay in all
 25 games. Original baseline/3: **45.0150**, 103 levels, five wins, 4,353,017

@@ -1,5 +1,5 @@
 {
-  "observed_at": "2026-10-27T18:16:29.674830+00:00",
+  "observed_at": "2026-10-27T19:17:37.869579+00:00",
   "input_paths": [
     {
       "COMPETITION_WHEELHOUSE": "/kaggle/input/arc-prize-2026-arc-agi-3/arc_agi_3_wheels",
@@ -25,6 +25,17 @@
     "library_sha256": "83057d90c3248775260aa3cc5d06a9f59a36572298dc0d41ef58a858a9a4efe0"
   },
   "matches_cpu_gate": true,
-  "model_readiness_verified": false,
-  "source": "Exact version live notebook log; final gameplay pending"
+  "model_readiness_verified": true,
+  "source": "Exact version live notebook log; final gameplay pending",
+  "readiness": [
+    "READY after 523s -> http://127.0.0.1:8001/v1",
+    "Local model ready after 1.0s of public readiness wait"
+  ],
+  "effective_run": {
+    "games": 25,
+    "passes": 1,
+    "concurrency": 25,
+    "gameplay_seconds": 7200,
+    "deadline": "2026-10-27T20:24:38.954066"
+  }
 }
