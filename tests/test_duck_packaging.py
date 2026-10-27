@@ -134,3 +134,51 @@ def test_verification_experiment_is_a_single_prompt_option_with_matched_serving(
     assert metadata['id']=='kunalsinghh25/arc-hydra-duck-verification'
     for field in ('model_sources','dataset_sources','kernel_sources','enable_internet'):
         assert metadata[field]==base_meta[field]
+
+
+def test_verified_planner_keeps_serving_and_installs_before_unpickling():
+    import ast
+    baseline,base_meta,_=build()
+    notebook,metadata,provenance=build(agent_variant='verified-planning')
+    serving=lambda n:next(c['source'] for c in n['cells'] if c['source'].startswith('# Paste this entire file'))
+    assert serving(notebook)==serving(baseline)
+    assert metadata['model_sources']==base_meta['model_sources']
+    assert metadata['dataset_sources']==base_meta['dataset_sources']
+    assert metadata['id']=='kunalsinghh25/arc-hydra-verified-planner'
+    assert not metadata['enable_internet']
+    assert provenance['competition_finalization_reserve_seconds']==600
+    setup=next(i for i,c in enumerate(notebook['cells']) if 'install into the writable' in c['source'])
+    restore=next(i for i,c in enumerate(notebook['cells']) if c['source'].startswith('# Restore the deployment target'))
+    assert setup<restore
+    run=next(c['source'] for c in notebook['cells'] if c['source'].startswith("print('Starting benchmark...')"))
+    compile(run,'verified-planner-run','exec',flags=ast.PyCF_ALLOW_TOP_LEVEL_AWAIT)
+    assert run.index('start_lifecycle(bm,') < run.index('await bm.run(')
+    assert '_hydra_finish(type(_hydra_run_error).__name__)' in run
+    assert 'minimal_diagnostics=True' in run
+    assert 'bm.to_json_dict()' in run
+
+
+def test_verified_planner_readiness_is_shared_by_public_and_competition(monkeypatch):
+    from pathlib import Path
+    from uuid import uuid4
+    import time
+    import urllib.request
+    root=Path(__file__).resolve().parents[1]/'test-artifacts'
+    root.mkdir(exist_ok=True)
+    class Ready:
+        status=200
+        def __enter__(self): return self
+        def __exit__(self,*args): pass
+    monkeypatch.setattr(urllib.request,'urlopen',lambda *a,**k:Ready())
+    notebook,_,_=build(agent_variant='verified-planning')
+    source=next(c['source'] for c in notebook['cells'] if c['source'].startswith("print('Starting benchmark...')"))
+    prelude=source.split('# ARC-Hydra shared readiness and durable lifecycle evidence.\n',1)[1].split('# Build the live competition game list',1)[0]
+    for competition in (False,True):
+        directory=root/('readiness-'+uuid4().hex)
+        directory.mkdir()
+        namespace=dict(TRUE_SUBMISSION=competition,WORKING_DIR=directory,
+            SERVED_MODEL_PORT=8001,NOTEBOOK_START_TIME=time.time(),proc=SimpleNamespace(poll=lambda:None))
+        exec(compile(prelude,'shared-readiness','exec'),namespace)
+        record=json.loads((directory/'hydra_lifecycle.json').read_text())
+        assert record['phase']=='model_ready'
+        assert record['context']['competition']==competition

@@ -6,7 +6,43 @@ reference, using eligible, reproducible offline code. Public development scores,
 accepted uploads and successful tests do not prove success. The goal remains
 active until official evidence meets it.
 
-## Latest checkpoint: 27 October, research and strategy reset
+## Latest checkpoint: 27 October, 20:32 IST — verified planner implemented
+
+User authorized building the strongest candidate and all required actions.
+Implemented the verified-planning agent on the frozen original model/runtime:
+`hydra/verified_planning.py`, `scripts/install_verified_agent.py`, and lifecycle
+diagnostics. This is executable enforcement, not another verification prompt.
+One exploratory action per tool call remains available. Planned batches replay
+eligible current-level transitions, reject insufficient/contradictory evidence,
+and check each prospective action. Stops and counterexamples are recorded as
+mechanical events independently from model-written stdout. New prompt wording
+matches the enforced contract; existing unchecked-batch wording is rewritten.
+
+Shared public/competition startup readiness, global finalization reserve and
+durable lightweight progress counters are included. The public preflight uses
+competition-style minimal diagnostics and manually saves benchmark metrics.
+This exercises more of the competition path but does not yet reproduce its
+hidden gateway. The root cause of the earlier official zero remains unproven.
+
+**84 local tests passed.** CPU integration v1 caught a patch EOF newline error
+before GPU use; fixed and regression-tested. CPU v2 passed seven mechanical
+cases. Final **CPU probe v3 COMPLETE** passed those seven cases and rendered
+prompt consistency on the actual Kaggle source bundle. Installed extension and
+candidate hashes match. Evidence: `reports/kaggle/verified-cpu-probe-v3/`.
+
+Private GPU pilot **kunalsinghh25/arc-hydra-verified-planner/1 is RUNNING**:
+the existing five public diagnostic games, one pass, 900 seconds after model
+readiness. Upload hashes and design are in `reports/kaggle/verified-planner-v1/`.
+Observer session 79691 follows that exact version. Latest free quota before
+upload: 58,754.402 seconds, paid scaling disabled. No official entry was made.
+
+Next: verify actual model gameplay, persisted mechanical helper events and
+lifecycle output. If adoption/progress justify it, run a matched full 25-game
+comparison before selecting another official entry. Best official remains
+24.87; no score improvement or completion of the >71.48 objective is claimed.
+Implementation contracts/limitations: `docs/verified_planner.md`.
+
+## Previous checkpoint: 27 October, research and strategy reset
 
 User explicitly requested deeper internet/paper/model research after expressing
 dissatisfaction with incremental runtime work. Completed a 3,168-word research

@@ -1,0 +1,8 @@
+{
+  "files": {
+    "hydra/verified_planning.py": "2fbcd9dc435ae8844e770fee3fce6987c0c37da7aecea6f5f41feb7b7cdf7172",
+    "scripts/install_verified_agent.py": "995b25a90892ace4ea42d307fde39f653544f08d0376e7fa746d9b3e120c29cd",
+    "scripts/verified_agent_probe.py": "a7709ed987397b46e116f0fa57483df5b293114166fc0ac2d8a1bede11c97225"
+  },
+  "upstream_patch_sha256": "80aef535ee80970622127f3ee1917e1b127db22ebe07ece40fc8558a63b4484d"
+}
