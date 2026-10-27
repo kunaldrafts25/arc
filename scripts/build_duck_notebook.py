@@ -16,7 +16,7 @@ SOURCE_META = SOURCE.with_name('upstream-metadata.json')
 PREFIXES = ('ft09', 'ls20', 'r11l', 'vc33', 'bp35')
 
 
-def build(mode='preflight', contest_reserve_seconds=None, runtime_overlay_dataset=None, runtime_overlay_sha256=None, agent_variant='baseline', model_variant='intel', runtime_overlay_kernel=None):
+def build(mode='preflight', contest_reserve_seconds=None, runtime_overlay_dataset=None, runtime_overlay_sha256=None, agent_variant='baseline', model_variant='intel', runtime_overlay_kernel=None, public_runtime_seconds=None, notebook_budget_seconds=None):
     if runtime_overlay_dataset and runtime_overlay_kernel:
         raise ValueError('Select one runtime overlay source')
     runtime_overlay_source=runtime_overlay_dataset or runtime_overlay_kernel
@@ -27,6 +27,14 @@ def build(mode='preflight', contest_reserve_seconds=None, runtime_overlay_datase
     planning=agent_variant in ('verified-planning','planning-assist')
     if planning and contest_reserve_seconds is None:
         contest_reserve_seconds=600
+    if notebook_budget_seconds is not None:
+        if type(notebook_budget_seconds) is not int or not 1800<=notebook_budget_seconds<=32400:
+            raise ValueError('Notebook wall budget must be 1800..32400 seconds')
+        if contest_reserve_seconds is None:contest_reserve_seconds=600
+        if contest_reserve_seconds>=notebook_budget_seconds:
+            raise ValueError('Finalization reserve must be smaller than notebook budget')
+    if public_runtime_seconds is not None and (type(public_runtime_seconds) is not int or not 60<=public_runtime_seconds<=31800):
+        raise ValueError('Public gameplay limit must be 60..31800 seconds')
     if model_variant not in ('intel','swift-1.5'):
         raise ValueError(model_variant)
     if model_variant!='intel' and (agent_variant!='baseline' or runtime_overlay_source is not None):
@@ -62,13 +70,16 @@ def build(mode='preflight', contest_reserve_seconds=None, runtime_overlay_datase
         authors=['Daniel Franzen', 'Jeroen Cottaar', 'Tufa Labs'],
         license='Apache-2.0; third-party model/runtime licenses also apply',
         mode=mode, public_games=list(PREFIXES) if mode=='preflight' else 'all 25',
-        public_runtime_seconds=900 if mode=='preflight' else 7200,
+        public_runtime_seconds=public_runtime_seconds if public_runtime_seconds is not None else (900 if mode=='preflight' else 7200),
         public_startup_allowance_seconds=3600,
         competition_changes='None to model, prompts, tools, serving or scheduling',
     )
     if contest_reserve_seconds is not None:
         provenance['competition_finalization_reserve_seconds'] = contest_reserve_seconds
         provenance['competition_changes'] = 'Global notebook deadline with finalization reserve; agent/model/prompts/tools/serving/scheduling settings unchanged'
+    if notebook_budget_seconds is not None:
+        provenance['notebook_wall_budget_seconds']=notebook_budget_seconds
+        provenance['public_deadline_includes_startup']=True
     if model_variant=='swift-1.5':
         manifest=json.loads((ROOT/'baselines/swift_15/model.json').read_text())
         helper=(ROOT/'scripts/swift_model_view.py').read_text()
@@ -177,12 +188,20 @@ MODEL_DIR = hydra_swift_module['prepare'](hydra_swift_parts, '/tmp/hydra-swift-m
         evaluation += '    bm.games = [g for g in bm.games if g.env_name.split("-")[0] in hydra_prefixes]\n'
         evaluation += '    if len(bm.games) != len(hydra_prefixes):\n        raise RuntimeError("Public preflight games missing")\n'
     evaluation += '    bm.solver.concurrency = len(bm.games)\n'
-    evaluation += f'    soft_end = datetime.now() + timedelta(seconds={provenance["public_runtime_seconds"]})\n'
+    if notebook_budget_seconds is None:
+        evaluation += f'    soft_end = datetime.now() + timedelta(seconds={provenance["public_runtime_seconds"]})\n'
+    else:
+        evaluation += f'    hydra_public_remaining = NOTEBOOK_START_TIME + {notebook_budget_seconds} - {contest_reserve_seconds} - time.time()\n'
+        evaluation += '    if hydra_public_remaining <= 0:\n        raise RuntimeError("Startup consumed the notebook gameplay budget")\n'
+        evaluation += f'    bm.solver.max_runtime_s_per_game = min({provenance["public_runtime_seconds"]}, hydra_public_remaining)\n'
+        evaluation += f'    soft_end = min(datetime.now() + timedelta(seconds={provenance["public_runtime_seconds"]}), datetime.fromtimestamp(NOTEBOOK_START_TIME + {notebook_budget_seconds} - {contest_reserve_seconds}))\n'
     evaluation += '    print("Hydra effective public run:", dict(games=len(bm.games), passes=bm.n_passes, concurrency=bm.solver.concurrency, gameplay_seconds=bm.solver.max_runtime_s_per_game, deadline=soft_end.isoformat()))\n'
     evaluation += f'    Path(WORKING_DIR / "hydra_provenance.json").write_text(json.dumps({provenance!r}, indent=2))\n'
     if contest_reserve_seconds is not None:
         evaluation += '\n# ARC-Hydra bounded competition finalization.\nif TRUE_SUBMISSION:\n'
         evaluation += '    hydra_notebook_budget = float(target.max_runtime_s)\n'
+        if notebook_budget_seconds is not None:
+            evaluation += f'    hydra_notebook_budget = min(hydra_notebook_budget, {notebook_budget_seconds})\n'
         evaluation += f'    if not {contest_reserve_seconds} < hydra_notebook_budget:\n        raise RuntimeError("Notebook budget is smaller than finalization reserve")\n'
         evaluation += f'    soft_end = datetime.fromtimestamp(NOTEBOOK_START_TIME + hydra_notebook_budget - {contest_reserve_seconds})\n'
         evaluation += '    print("Competition soft deadline:", soft_end.isoformat(), "including notebook startup")\n'
@@ -295,8 +314,10 @@ def main():
     parser.add_argument('--runtime-overlay-sha256')
     parser.add_argument('--agent-variant',choices=('baseline','rolling-summary','step-verification','verified-planning','planning-assist'),default='baseline')
     parser.add_argument('--model-variant',choices=('intel','swift-1.5'),default='intel')
+    parser.add_argument('--public-runtime-seconds',type=int)
+    parser.add_argument('--notebook-budget-seconds',type=int)
     args = parser.parse_args()
-    notebook, metadata, provenance = build(args.mode,args.contest_reserve_seconds,args.runtime_overlay_dataset,args.runtime_overlay_sha256,args.agent_variant,args.model_variant,args.runtime_overlay_kernel)
+    notebook, metadata, provenance = build(args.mode,args.contest_reserve_seconds,args.runtime_overlay_dataset,args.runtime_overlay_sha256,args.agent_variant,args.model_variant,args.runtime_overlay_kernel,args.public_runtime_seconds,args.notebook_budget_seconds)
     output=args.output or ('notebooks/duck_swift' if args.model_variant=='swift-1.5' else
                           'notebooks/duck_summary' if args.agent_variant=='rolling-summary' else
                           'notebooks/duck_verification' if args.agent_variant=='step-verification' else

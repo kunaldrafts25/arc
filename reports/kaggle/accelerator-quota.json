@@ -1,8 +1,8 @@
 {
-  "checked_at": "2026-10-27T15:44:48.253648+00:00",
-  "gpu_used_seconds": 50866.213,
+  "checked_at": "2026-10-27T20:56:08.581553+00:00",
+  "gpu_used_seconds": 74936.087,
   "gpu_allowed_seconds": 108000.0,
   "gpu_reserved_seconds": 0.0,
-  "gpu_remaining_seconds": 57133.787,
-  "pay_to_scale_enabled": false
+  "pay_to_scale_enabled": false,
+  "refresh_time": "2026-10-31T00:00:00"
 }

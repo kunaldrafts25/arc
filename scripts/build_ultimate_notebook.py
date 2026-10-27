@@ -13,7 +13,7 @@ from scripts.build_duck_notebook import build
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def package(mode='benchmark'):
+def package(mode='benchmark',public_runtime_seconds=None,notebook_budget_seconds=None):
     gate = ROOT / 'reports/kaggle/verified-cpu-probe-v5'
     report = json.loads((gate / 'verified-probe.json').read_text(encoding='utf-8'))
     manifest = json.loads((ROOT / 'notebooks/verified_cpu_probe/source-manifest.json').read_text(encoding='utf-8'))
@@ -29,7 +29,7 @@ def package(mode='benchmark'):
     for name, expected in manifest['files'].items():
         if sha256((ROOT / name).read_bytes()).hexdigest() != expected:
             raise ValueError('Source differs from CPU-tested package: ' + name)
-    notebook, metadata, provenance = build(mode, agent_variant='planning-assist')
+    notebook, metadata, provenance = build(mode, agent_variant='planning-assist',public_runtime_seconds=public_runtime_seconds,notebook_budget_seconds=notebook_budget_seconds)
     resolver=(ROOT/'scripts/resolve_kaggle_inputs.py').read_text(encoding='utf-8')
     config=next(c for c in notebook['cells'] if c['source'].startswith('import json\nimport os'))
     anchor='# Apply harness patch'
@@ -57,8 +57,9 @@ def package(mode='benchmark'):
         'optional mechanical replay/planning tools with original ordinary action batching, '
         'shared backend readiness, lifecycle records and a ten-minute competition finalization reserve. '
         'No model-weight training.\n\n'
-        f'Public mode: **{mode}**. Preflight plays five diagnostic games for 900 seconds after readiness; '
-        'benchmark plays all 25 public games for 7200 seconds after readiness. '
+        f'Public mode: **{mode}**. Preflight plays five diagnostic games for 900 seconds after readiness; '+
+        ('benchmark plays all 25 public games for 7200 seconds after readiness. ' if notebook_budget_seconds is None else
+         f'benchmark uses a {notebook_budget_seconds}-second whole-notebook budget including startup and a finalization reserve. ')+
         'Official reruns retain the nine-hour competition budget with startup/finalization included. '
         'No public score is a hidden-score estimate.\n\n'
         'Offline CPU probe v5 passed eight sandbox cases and 16 rendered user-prompt combinations. '
