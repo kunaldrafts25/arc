@@ -6,7 +6,41 @@ reference, using eligible, reproducible offline code. Public development scores,
 accepted uploads and successful tests do not prove success. The goal remains
 active until official evidence meets it.
 
-## Latest checkpoint: 27 October, 08:18 IST
+## Latest checkpoint: 27 October, research and strategy reset
+
+User explicitly requested deeper internet/paper/model research after expressing
+dissatisfaction with incremental runtime work. Completed a 3,168-word research
+report covering 27 primary-source URLs, including 13 papers, with evidence
+limitations and a ranked implementation/compute plan:
+`reports/research/2026-10-27/strategy.md`.
+The source register and local evidence hashes are in the same directory.
+
+Official verification entry **57686595 is COMPLETE / 0.00**, with no error
+description in available metadata. Best scored official remains original
+**57657435 / 24.87**. A zero score does not identify its cause. Public 46.23
+does not override this official result. Do not promote verification solely from
+its public mean, and do not attribute the zero to sampling or a prompt change
+without execution evidence.
+
+Runtime/2 is ERROR. It passed the real Triton host-C probe, then failed
+FlashInfer XQA JIT linking with `cannot find -lcuda`. The original runtime is
+the control; no runtime/3 job was launched. Research is now prioritized over
+another automatic linker repair.
+
+Recommended next implementation: reproduce competition lifecycle on public
+environments, with explicit readiness/actions/deadline/output evidence; then
+add an optional counterexample/replay layer on the frozen working agent.
+Mechanics and goal uncertainty must be separate, unknown predictions explicit,
+and exploration allowed without a complete simulator. Compare with a textual
+control before scaling. Alternative-model candidates and training options are
+ranked in the report; none is claimed to beat 71.48.
+
+Fresh official constraints and quota: 58,754.402 free GPU seconds (~16.32 h),
+paid scaling disabled; next reported reset 31 October 00:00 UTC. No new GPU
+jobs, submissions or model-weight downloads were made during the research pass.
+The goal remains active and unachieved.
+
+## Previous checkpoint: 27 October, 08:18 IST
 
 Best scored official entry remains **57657435 / 24.87**. New official entry
 **57686595** is accepted and PENDING, with no score/error at 08:17 IST. It uses

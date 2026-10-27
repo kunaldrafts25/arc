@@ -9,11 +9,11 @@
   "allowance_after_submission": 0,
   "official": {
     "submission_ref": "57686595",
-    "status": "PENDING",
-    "public_score": "",
+    "status": "COMPLETE",
+    "public_score": "0.00",
     "private_score": "",
     "error": "",
-    "checked_at": "2026-10-27T08:17:16.037114+05:30"
+    "checked_at": "2026-10-27T13:43:36.293067+05:30"
   },
-  "boundary": "Public development result does not predict official competition score; >71.48 goal remains unverified"
+  "boundary": "Official score is 0.00; root cause is not established by available metadata. Original entry 57657435 / 24.87 remains best scored. Public 46.23 does not establish hidden performance."
 }
