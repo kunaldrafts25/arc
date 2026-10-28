@@ -49,13 +49,17 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('kernel',help='Exact owner/slug/version; never follows latest')
     parser.add_argument('--output',type=Path,required=True)
+    parser.add_argument('--token-file',default='access_token')
     args=parser.parse_args()
     if not re.fullmatch(r'[A-Za-z0-9_-]+/[A-Za-z0-9_-]+/[1-9][0-9]*',args.kernel):
         parser.error('An exact owner/slug/version is required')
     output=(ROOT/args.output).resolve()
     if not output.is_relative_to(ROOT):
         parser.error('Observer output must remain in the project')
-    os.environ['KAGGLE_API_TOKEN']=(ROOT/'.kaggle/access_token').read_text(encoding='utf-8-sig').strip()
+    token_path=(ROOT/'.kaggle'/args.token_file).resolve()
+    if token_path.parent != (ROOT/'.kaggle').resolve():
+        parser.error('Select a token file inside the project .kaggle directory')
+    os.environ['KAGGLE_API_TOKEN']=token_path.read_text(encoding='utf-8-sig').strip()
     os.environ['KAGGLE_CONFIG_DIR']=str(ROOT/'.kaggle')
     from kaggle.api.kaggle_api_extended import KaggleApi
     api=KaggleApi()
