@@ -27,3 +27,7 @@ A matched inspection candidate was also launched, for an aggregate ceiling
 of 18 GPU hours across both jobs. Do not treat two accepted notebooks, CPU
 checks or source-hash agreement as evidence of gameplay improvement. Preserve
 the best completed official result, submission 57726784 at 28.45.
+
+## Terminal outcome
+
+Both the requested RTX runtime and model startup lacked an NVIDIA driver. This exact version is ERROR before inference; no gameplay or score was established. See `terminal-status.json`. A separate explicit standard-T4 probe did receive real GPUs. Do not restart this RTX configuration without new hardware evidence.

@@ -24,3 +24,7 @@ no competition datasource and refuses competition-rerun mode. Results must be
 transferred and officially evaluated through the original competition account
 before claiming an official improvement. Account-rule compliance is not
 certified by this technical setup.
+
+## Terminal outcome
+
+Both the requested RTX runtime and model startup lacked an NVIDIA driver. This exact version is ERROR before inference; no gameplay or score was established. See `terminal-status.json`. A separate explicit standard-T4 probe did receive real GPUs. Do not restart this RTX configuration without new hardware evidence.
