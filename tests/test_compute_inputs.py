@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 from uuid import uuid4
 
@@ -30,15 +29,8 @@ def test_nested_public_wheelhouse_resolves_with_canonical_and_short_mounts(legac
 
 
 @pytest.mark.parametrize('kind',['control','inspection'])
-def test_compute_package_has_no_competition_attachment_and_validates_public_inputs(kind):
-    notebook,metadata,provenance=package(kind)
-    assert metadata['competition_sources']==[] and metadata['id'].startswith('kunalsinghh03/')
-    assert provenance['notebook_wall_budget_seconds']==32400
-    config=next(c['source'] for c in notebook['cells'] if c['source'].startswith('import json\nimport os'))
-    assert 'This notebook is public development only' in config
-    checks=config.split('from hashlib import sha256 as _hydra_public_sha',1)[1].split('# Apply harness patch',1)[0]
-    checks='from hashlib import sha256 as _hydra_public_sha'+checks
-    root=Path(__file__).resolve().parents[1]
-    exec(compile(checks,'public-compute-input-checks','exec'),dict(Path=Path,json=json,
-        COMPETITION_WHEELHOUSE=str(root/'reference/public-development-inputs/arc_agi_3_wheels')))
-    assert 'KGAT_' not in json.dumps(notebook)
+def test_compute_package_cannot_repeat_unattached_rtx_jobs(kind):
+    # These exact source candidates require the competition-only RTX hardware.
+    # Public input equivalence does not make that hardware available elsewhere.
+    with pytest.raises(ValueError, match='requires an ARC-AGI-3 competition attachment'):
+        package(kind)

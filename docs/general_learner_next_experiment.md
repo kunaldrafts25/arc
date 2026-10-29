@@ -1,9 +1,11 @@
 # Next experiment after official 28.45
 
-The highest-priority change is evidence-based recovery from stalled learning,
-coupled with shorter action plans once mechanics are supported. Adding more
-general advice or extending the same stalled trajectory is not yet justified.
-No new version or GPU job is launched by this document.
+The next isolated GPU experiment should test exact coordinate inspection on
+the preserved flexible agent. The original recovery advisory is held back:
+the 29 October replay audit below found that most of its prompts lack evidence
+of repeated visible transitions. Recovery remains a hypothesis requiring a
+more selective trigger and measured gameplay benefit. No GPU job is launched
+by this document.
 
 ## What the completed run establishes
 
@@ -73,3 +75,43 @@ multi-hour job against the remaining quota or use other accounts to bypass it.
 No model-weight training has occurred. Training a policy or teacher-distilled
 model would require family-separated data, adequate compute and a new held-out
 evaluation. It is a separate experiment, not a guaranteed next-score increase.
+
+## Replay audit and revised decision, 29 October 2026
+
+`scripts/audit_recovery_replay.py` replayed the frozen 15,476 public actions
+through the offline observation/action API. All 25 games reproduced their
+recorded completed-level counts and per-level action counts. This is aggregate
+parity, not proof that every pixel matched the original run: original frame
+hashes are unavailable. Decision boundaries are approximated by positive
+generation-token charges; no-action decisions are absent from the recording.
+
+The existing recovery monitor would emit 257 notices (128,046 characters).
+252 notices have no repeated visible transition in their evidence window.
+123 precede later success on that same level, including 38 within 32 actions
+of completion. These are retrospective observations, not a counterfactual:
+a notice might help or hurt, and a long successful level can still waste actions.
+Only five notices include a repeated visible transition; full-frame changes
+such as counters may conceal repetition. The broad trigger should therefore
+not be promoted simply because the CPU integration passed. Retain the frozen
+candidate for provenance and test a selective trigger separately if justified.
+
+Exact inspection has a concrete motivating trace defect (incorrect run-length
+endpoints) and a completed CPU gate, but still lacks GPU gameplay evidence.
+Its next test must use the original account with the competition attachment,
+preserve the same model/runtime and compare completions and action efficiency.
+The official comparison of the preserved flexible agent is already accepted
+as submission 57751759 and was still PENDING at 06:29 UTC on 29 October.
+
+The authenticated official leaderboard at that check was led by Yi-Chia Chen
+@ Fields Model at 75.56. Our best completed official result remains 28.45.
+Deadline remains 2 November 23:59 UTC (3 November 05:29 IST); CPU/GPU runs must
+finish within nine hours with internet disabled. These are separate from the
+original account's development quota: 1,192.259 free RTX seconds remain until
+31 October 00:00 UTC, and paid scaling is disabled.
+
+The official [accelerator guidance](https://www.kaggle.com/competitions/arc-prize-2026-arc-agi-3/overview)
+explicitly limits RTX to notebooks attached to ARC-AGI-3. This is consistent
+with the two unattached development jobs receiving no GPU driver; it does not
+prove the backend's exact failure mechanism. The historical public-input
+builder now refuses that configuration. Do not use additional accounts to
+bypass quota. No additional GPU job or duplicate submission was launched.

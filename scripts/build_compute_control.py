@@ -1,4 +1,9 @@
-"""Use validated public practice inputs without attaching a competition datasource."""
+"""Historical public-input experiment builder; rejects unsupported RTX runs.
+
+Official ARC-3 accelerator guidance limits RTX sessions to notebooks attached
+to the competition. The two earlier unattached versions failed without a GPU
+driver. Keep those uploaded files frozen, but do not generate more such jobs.
+"""
 from hashlib import sha256
 import argparse
 import json
@@ -31,6 +36,10 @@ def package(kind='control'):
     source=ROOT/'notebooks'/('flexible_extended_control' if kind=='control' else 'inspection_candidate')
     notebook=json.loads((source/'submission.ipynb').read_text(encoding='utf-8'))
     metadata=json.loads((source/'kernel-metadata.json').read_text(encoding='utf-8'))
+    if metadata.get('enable_gpu') and metadata.get('machine_shape') == 'NvidiaRtxPro6000':
+        raise ValueError('RTX PRO 6000 requires an ARC-AGI-3 competition attachment. '
+                         'This public-only builder removes that attachment; use the '
+                         'original entered account and competition notebook instead.')
     provenance=json.loads((source/'provenance.json').read_text(encoding='utf-8'))
     config=next(c for c in notebook['cells'] if c['source'].startswith('import json\nimport os'))
     original_resolver=(ROOT/'scripts/resolve_kaggle_inputs.py').read_text(encoding='utf-8')
