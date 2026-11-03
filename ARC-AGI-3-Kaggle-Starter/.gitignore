@@ -1,0 +1,94 @@
+# Kaggle credentials (project-local, never check in)
+.kaggle/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Vendored framework + downloaded game source + agent recordings
+vendor/
+environment_files/
+recordings/
+logs.log
+
+# Generated artefacts
+notebooks/submission.ipynb
+reference/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+.tmp/
+.pytest_cache/
+test-artifacts/
+# Transient live stream; final downloaded run logs remain tracked evidence.
+reports/kaggle/*/live.log
+reports/kaggle/*/watcher.log
+reports/kaggle/*/attempt.lock
+reports/kaggle/*/cancel.requested
+reports/kaggle/flexible-official-rerun/state.json
+# Redundant full requests, renderings and pickled sidecars stay locally cached.
+# Metrics, event histories, text transcripts and final server logs remain evidence.
+reports/kaggle/*/*_requests.jsonl
+reports/kaggle/*/*.pkl
+reports/kaggle/*/diagnostics.html
+reports/kaggle/*/movies/
+reports/kaggle/*/solver_analysis/
+reports/kaggle/*/prompts/
+reports/kaggle/*/pennyroyal-v3-overlay/
+reports/kaggle/pennyroyal-v3-build-v1/arc-hydra-pennyroyal-v3-build.log
+pytest-cache-files-*/
+
+# Credentials and local environment overrides
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Downloaded/trained weights and install bundles stay local. This is a code release.
+*.safetensors
+*.gguf
+*.pt
+*.pth
+*.ckpt
+*.whl
+*.tar.gz
+*.zip
+
+# Private teacher examples, downloaded datasets, tokenizer caches and copied source.
+reports/arc3/qwen27-training-pilot/**/train.jsonl
+reports/arc3/qwen27-training-pilot/**/validation.jsonl
+reports/research/arc3-training-selection-*/teacher-traces/
+reports/research/arc3-training-selection-*/teacher-prefixes/
+reports/research/arc3-training-selection-*/target-tokenizer/
+reports/research/arc3-training-selection-*/dependency-source/
+reports/research/arc3-training-selection-*/serving-source/
+reports/research/arc3-training-selection-*/curriculum-sample/
+reports/research/arc3-training-selection-*/current-launcher.py
+reports/research/arc3-training-selection-*/pennyroyal-*.sh
+reports/research/arc3-flashnext-gguf-training-*/*.py
+reports/research/arc3-flashnext-gguf-training-*/pyproject.toml
+reports/research/arc3-human-teacher-*/actions.json
+reports/research/arc3-human-teacher-*/reasoning.json
+reports/research/arc3-human-teacher-*/timeline.json.gz
+reports/kaggle/**/flashnext-train.jsonl
+reports/kaggle/**/flashnext-validation.jsonl
+reports/kaggle/**/arc3-training-dependencies/
+notebooks/training_data_cpu_probe/probe.ipynb
+
+# Transient ARC3 host observers and remote execution logs; retain result JSON.
+reports/arc3/**/*.lock
+reports/arc3/**/*-pid.txt
+reports/arc3/**/process.json
+reports/arc3/**/*.log
+reports/arc3/**/cancel.requested
+reports/kaggle/**/latest-execution.log
+reports/kaggle/**/*_requests.jsonl
+reports/kaggle/**/transcripts/
+
+# Release/audit exports are generated, never inputs to the agent.
+dist/
+reports/arc3/release-snapshot.json

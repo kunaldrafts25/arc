@@ -1,0 +1,15 @@
+# Frozen ARC3 notebooks and evidence are identified by hashes of exact bytes.
+# Disable newline conversion; do not normalize/reformat evaluated packages.
+/notebooks/** -text -whitespace
+/reports/kaggle/** -text -whitespace
+/reports/arc3/** -text -whitespace
+
+# CPU-gate source manifests hash LF Python source on every platform.
+/hydra/*.py text eol=lf
+/agent/*.py text eol=lf
+/scripts/*.py text eol=lf
+
+# The independent ARC2 track keeps its existing Git newline behavior.
+/notebooks/arc2*/** !text !whitespace
+/reports/kaggle/arc2*/** !text !whitespace
+/scripts/*arc2*.py !text !eol
