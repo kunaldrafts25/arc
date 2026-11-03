@@ -1,3 +1,5 @@
+> Current artifact publication: see [ARTIFACTS.md](../ARTIFACTS.md) at repository root. Previously withheld adapters and raw records are now published.
+
 # ARC-Hydra: ARC-AGI-3 research agent
 
 An offline game-playing agent and experiment archive for

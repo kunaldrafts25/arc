@@ -1,3 +1,7 @@
+# Artifact publication update
+
+Adapters and raw research data are now available in the [free release assets](https://github.com/kunaldrafts25/arc/releases/tag/untagged-444f251249f0d5df73e7). See [ARTIFACTS.md](ARTIFACTS.md), [ARTIFACTS.json](ARTIFACTS.json) and [MODEL_CARD.md](MODEL_CARD.md). Earlier source-cleanup notes that called these artifacts private or pending are historical. Credentials, software environments and disposable caches remain excluded.
+
 # ARC research workspace
 
 Complete combined publication of the substantive code, notebooks, research and result evidence under `D:/compi`.
