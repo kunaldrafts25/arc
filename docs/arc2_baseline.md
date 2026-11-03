@@ -44,12 +44,13 @@ the full published NVARC method or its reported scores. Public notebook
 contains additional induction changes, so its earlier reported 28.89 must not
 be attributed to our implementation.
 
-`kunalsinghh03/arc-hydra-arc2-neural-development/1` is RUNNING on verified real
-T4 hardware. It loaded the checkpoint and emitted actual generation tokens.
-It benchmarks all 1,000 public training tasks with a 12-hour maximum including
-startup and a ten-minute finalization reserve. Predictions are frozen before
-training solution labels are read. The pretrained checkpoint may have seen
-these public tasks; any eventual score is not a held-out result.
+`kunalsinghh03/arc-hydra-arc2-neural-development/1` is COMPLETE on verified T4
+hardware. Independent rescoring reproduces neural-with-fallback 258/1,076,
+symbolic 49/1,076 and hybrid 281/1,076 (26.1152%). Runtime was 42,602 seconds.
+There were 1,841 valid generations, 41 memory failures, 32 unfinished generations
+and 238 budget skips; 154 outputs had no valid neural generation. Predictions
+were frozen before public training labels were read. The pretrained checkpoint
+may have seen these tasks; these scores are not held-out or official results.
 
 ## Task-local learning and matched comparison
 
@@ -66,11 +67,75 @@ produced valid grids. Peak allocated GPU memory was 7,845,596,160 bytes (7.31
 GiB). Lower training losses and passing these checks do not establish improved
 prediction accuracy.
 
-`kunalsinghh03/arc-hydra-arc2-adaptation-comparison/1` is RUNNING: same model/GPU,
-grammar and prediction views before and after adaptation on 50 fixed public
-training tasks. It will report paired improvements and regressions after both
-prediction files are frozen. This determines whether the small adaptation
-should proceed to a competition candidate. It does not certify hidden transfer.
+`kunalsinghh03/arc-hydra-arc2-adaptation-comparison/1` is COMPLETE: the same
+model/GPU, grammar and views scored 19/51 before and 17/51 after adaptation.
+All 400 requested training steps completed, with zero improved and two regressed
+outputs. Do not promote this eight-step setting. This pilot uses a different
+subset from the full benchmark; percentages cannot be compared directly.
+
+## Original-account inference candidate, 29 October
+
+The official API refresh at 08:51 UTC confirmed Tufa Labs still leads at 88.06,
+the deadline remains 2 November 23:59 UTC, and one ARC2 submission is available
+today. Original-account free GPU time was 1,192.259 seconds, refreshing 31 October
+00:00 UTC; paid scaling was disabled. Raw pages and state are preserved under
+`reports/arc2/current-state/`. Rules confirm offline notebook execution up to
+12 hours, public external models allowed, one submission/day, two final choices.
+
+`kunalsinghh25/arc-hydra-arc2-inference-hybrid/1` was launched separately with a
+560-second visible preview and a 42,600-second official rerun budget. It reads
+the actual mounted competition test challenges and writes a complete validated
+symbolic fallback before neural work. The preview uses four actual-test tasks;
+the official rerun processes every supplied task. No training-development
+prediction files or solution files are packaged. No new jobs were launched on
+the development account.
+
+`arc2/bounded_inference.py` keeps the measured hybrid precedence rule, schedules
+the first view over every output before second views, checkpoints every output,
+and uses 256-token causal prefill chunks. A small fixed parity gate falls back
+to the old decoder if the two generated grids disagree. Chunking is motivated
+by the old OOM range of 4,802--6,526 prompt tokens; no old valid generation had
+more than 4,566 prompt tokens. The 32 unfinished generations all reached the
+120-second deadline; the 960-token cap exceeds the 930 tokens needed for a
+maximum-size valid grid and EOS. GPU diagnostics and official results must be
+inspected before claiming either memory or accuracy improvement.
+
+Version 1 completed in 341.72 seconds, produced eight valid generations on its
+four preview tasks, and passed full 240-task/259-output format validation. Both
+fixed small-prompt parity checks matched the baseline. The 6,526-token diagnostic
+did not exhaust memory (8,766,268,416 peak allocated bytes), but its 150-second
+diagnostic time cap stopped it after 740 tokens.
+
+After a fresh quota check showed 830.395 free seconds, a separate version 2
+preview was launched with a 500-second budget. Its scheduler allocates time
+using prompt length and demonstration-output size, with a 300-second per-view
+cap. It preserves the same symbolic/neural selection rule and first-view-first
+ordering. The long diagnostic completed all 930 tokens in 189.91 seconds with
+8,806,957,568 peak allocated bytes. This demonstrates functional completion and
+memory improvement on that formerly failing prompt, not prediction accuracy.
+Both small-prompt parity checks passed again. Fifteen ARC2 local tests pass.
+Frozen source packages and launch journals are retained separately for both
+versions. Final preview validation and official evaluation state are recorded
+under `reports/kaggle/arc2-inference-hybrid-v2/` when available.
+
+Version 2 completed in 404.56 seconds with eight valid actual-test preview
+generations and full 240-task/259-output format coverage. The exact version was
+submitted as **57765962** on 29 October at 09:10 UTC. At 09:11 UTC its official
+status was **PENDING**, with no score or error. The daily allowance is now zero;
+free GPU time remaining is 402.27 seconds, with paid scaling disabled. Best
+completed ARC2 official score remains 0.00 until a new result establishes more.
+A hidden read-only observer (`scripts/watch_arc2_official.py`, process 12240 at
+startup) writes `official-status.json` and `official-history.jsonl` under the
+version 2 report directory. It never launches or resubmits anything. If its
+process stops, reconcile this same submission reference instead of retrying
+the submission mutation.
+
+Frozen-candidate analysis (`scripts/analyze_arc2_candidates.py`) found the union
+of all stored neural/symbolic guesses covers only 282/1,076 training outputs,
+versus 281 for the hybrid. A demonstration-only shape rule recovers that single
+extra output without a regression in this development set. This diagnostic
+suggests candidate generation is the larger bottleneck in the frozen pool.
+The alternative selector is not in version 1 and has no held-out validation.
 
 ## Boundaries and resources
 
@@ -80,12 +145,12 @@ That download remains blocked. It was not retried through another endpoint.
 Only explicitly permitted public training challenges/solutions and the sample
 submission were downloaded. Official evaluations provide separate score evidence.
 
-The user-designated compute account hosts private development notebooks using
+The user-designated compute account hosted private development notebooks using
 public training inputs and publicly licensed weights. It makes no competition
 entries or submissions. Account-rule compliance is not certified by technical
-access. Each of the two active neural runs is capped at 12 hours, for at most
-24 hours plus short probes within the observed 30-hour free allowance; paid
-scaling is disabled. Original-account submissions remain separate.
+access. Both neural development runs completed; neither was restarted. No new
+compute was launched on that account in this continuation. Paid scaling is
+disabled. Original-account submissions remain separate.
 
 The separate ARC-AGI-3 control/inspection versions both terminated before
 inference: the requested RTX configuration had no NVIDIA driver. A standard
